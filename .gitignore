@@ -13,3 +13,6 @@ todos.json
 
 # typescript
 *.tsbuildinfo
+.dev.vars*
+!.dev.vars.example
+!.env.example
