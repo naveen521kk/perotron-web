@@ -224,7 +224,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                                 <span>Naveen's Tools</span>
                                 <Separator
                                     orientation="vertical"
-                                    className="h-3.5"
+                                    className="h-3.5 my-auto"
                                 />
                                 <span>Licensed under GNU GPLv3</span>
                             </div>
