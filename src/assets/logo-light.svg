@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="48"
+   height="48"
+   viewBox="0 0 36 36"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="favicon-light.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:export-filename="favicon-light.png"
+   inkscape:export-xdpi="122.88"
+   inkscape:export-ydpi="122.88"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs10" />
+  <sodipodi:namedview
+     id="namedview10"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="15.655344"
+     inkscape:cx="57.073163"
+     inkscape:cy="33.694564"
+     inkscape:window-width="3840"
+     inkscape:window-height="2126"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg10" />
+  <g
+     id="g10"
+     transform="matrix(0.0594681,0,0,0.0594681,0.15957,0.15957)">
+    <g
+       id="surface1"
+       transform="translate(50,50)">
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,0 C 0,0 0.5,1 1,0"
+         transform="scale(500)"
+         id="path1" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,1 C 0,1 0.5,0 1,1"
+         transform="scale(500)"
+         id="path2" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,0 C 0,0 1,0.5 0,1"
+         transform="scale(500)"
+         id="path3" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 1,0 C 1,0 0,0.5 1,1"
+         transform="scale(500)"
+         id="path4" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,0 1,1"
+         transform="scale(500)"
+         id="path5" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 1,0 0,1"
+         transform="scale(500)"
+         id="path6" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,0 C 0,0 0.5,0.5 0,1"
+         transform="scale(500)"
+         id="path7" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 1,1 C 1,1 0.5,0.5 1,0"
+         transform="scale(500)"
+         id="path8" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,0 C 0,0 0.5,0.5 1,0"
+         transform="scale(500)"
+         id="path9" />
+      <path
+         style="fill:none;stroke-width:0.01;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+         d="M 0,1 C 0,1 0.5,0.5 1,1"
+         transform="scale(500)"
+         id="path10" />
+    </g>
+  </g>
+  <style
+     id="style10">
+        path { stroke: rgb(0%,0%,0%); }
+        @media (prefers-color-scheme: dark) {
+        path { stroke: rgb(100%,100%,100%); }
+        }
+    </style>
+</svg>
