@@ -114,6 +114,13 @@ export const Route = createRootRoute({
                 href: "/site.webmanifest",
             },
         ],
+        scripts: [
+            // https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG
+            {
+                async: true,
+                src: "https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG",
+            },
+        ],
     }),
     notFoundComponent: () => (
         <main className="container mx-auto p-4 pt-16 text-center">
@@ -156,6 +163,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <html lang="en" suppressHydrationWarning>
             <head>
                 <HeadContent />
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-F61KVD3XWG');`,
+                    }}
+                />
             </head>
             <body className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20">
                 <ThemeProvider defaultTheme="system" storageKey="theme">
@@ -202,7 +218,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                                             variant: "ghost",
                                             size: "sm",
                                         }),
-                                        "flex items-center gap-2 justify-center text-center text-xs"
+                                        "flex items-center justify-center gap-2 text-center text-xs"
                                     )}
                                     aria-label="View source on GitHub"
                                 >
@@ -224,7 +240,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                                 <span>Naveen's Tools</span>
                                 <Separator
                                     orientation="vertical"
-                                    className="h-3.5 my-auto"
+                                    className="my-auto h-3.5"
                                 />
                                 <span>Licensed under GNU GPLv3</span>
                             </div>
