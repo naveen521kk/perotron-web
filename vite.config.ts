@@ -4,15 +4,26 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 
-import { cloudflare } from "@cloudflare/vite-plugin";
-
 const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact(), cloudflare({
-    viteEnvironment: {
-      name: "ssr"
-    }
-  })],
+    resolve: { tsconfigPaths: true },
+    plugins: [
+        devtools(),
+        tailwindcss(),
+        tanstackStart({
+            spa: {
+                enabled: true,
+                prerender: {
+                    outputPath: "/index",
+                    crawlLinks: true,
+                    retryCount: 3,
+                },
+            },
+            prerender: {
+                enabled: true,
+            },
+        }),
+        viteReact()
+    ],
 })
 
 export default config

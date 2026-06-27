@@ -1,12 +1,9 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tools",
-  "compatibility_date": "2026-06-20",
-  "observability": {
-    "enabled": true
-  },
-  "main": "@tanstack/react-start/server-entry",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "tools",
+    "compatibility_date": "2026-06-20",
+    "assets": {
+        "directory": "./dist/client",
+        "not_found_handling": "single-page-application",
+    },
 }
