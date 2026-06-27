@@ -44,6 +44,9 @@ export const Route = createFileRoute("/")({
                     "Merge PDFs, split PDFs, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
             },
         ],
+        links: [
+            { rel: "canonical", href: "https://tools.naveenmk.me/" },
+        ],
     }),
     component: HomePage,
 })

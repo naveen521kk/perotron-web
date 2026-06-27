@@ -38,6 +38,9 @@ export const Route = createFileRoute("/split")({
                     "Extract individual pages or split a large PDF into separate files — no uploads required. Your PDF stays in your browser and is never sent to a server.",
             },
         ],
+        links: [
+            { rel: "canonical", href: "https://tools.naveenmk.me/split" },
+        ],
     }),
     component: SplitPage,
 })

@@ -30,6 +30,22 @@ When modifying or extending the UI, the following rules must be strictly adhered
 3. **Icons:** The project uses `lucide-react` for iconography. When scaling icons, prefer `size-*` over `w-* h-*`.
 4. **Spacing:** Avoid `space-y-*` or `space-x-*`. Instead, use standard flexbox layout wrappers like `flex flex-col gap-*`.
 
+## SEO Guidelines
+- **Canonical URLs:** Every route must declare a `rel="canonical"` link tag in its `head()` function pointing to the production URL (`https://tools.naveenmk.me`). Add it inside a `links` array alongside any other link tags:
+  ```ts
+  head: () => ({
+      meta: [ /* ... */ ],
+      links: [
+          { rel: "canonical", href: "https://tools.naveenmk.me/<path>" },
+      ],
+  })
+  ```
+- The root domain is `https://tools.naveenmk.me`. Current canonical mappings:
+  - `/` → `https://tools.naveenmk.me/`
+  - `/merge` → `https://tools.naveenmk.me/merge`
+  - `/split` → `https://tools.naveenmk.me/split`
+- When adding a new route, always include its canonical URL following the same pattern.
+
 ## Package Management
 - Always use `pnpm` for installing dependencies.
 - Use `pnpm dlx shadcn@latest add <component>` to add new UI components to the project.

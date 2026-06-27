@@ -76,6 +76,9 @@ export const Route = createFileRoute("/merge")({
                     "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
             },
         ],
+        links: [
+            { rel: "canonical", href: "https://tools.naveenmk.me/merge" },
+        ],
     }),
     component: MergePage,
 })
