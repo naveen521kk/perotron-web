@@ -101,7 +101,7 @@ function HomePage() {
                     <TrustPillar
                         icon={<SiGithub className="size-4" />}
                         label="View the code"
-                        detail="github.com/naveen521kk"
+                        detail="github.com/naveen521kk/tools"
                         href="https://github.com/naveen521kk/tools"
                     />
                 </div>
@@ -163,14 +163,14 @@ function TrustPillar({
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-1 transition-colors hover:bg-muted"
+                className="flex flex-1 transition-colors hover:bg-muted bg-card w-full"
             >
                 {inner}
             </a>
         )
     }
 
-    return <div className="flex flex-1 bg-card">{inner}</div>
+    return <div className="flex flex-1 bg-card w-full">{inner}</div>
 }
 
 function ToolCard({
