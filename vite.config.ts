@@ -21,8 +21,12 @@ const config = defineConfig({
             prerender: {
                 enabled: true,
             },
+            sitemap: {
+                enabled: true,
+                host: "https://tools.naveenmk.me",
+            },
         }),
-        viteReact()
+        viteReact(),
     ],
 })
 
