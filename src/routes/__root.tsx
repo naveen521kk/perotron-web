@@ -17,6 +17,7 @@ import appCss from "../styles.css?url"
 import { ModeToggle } from "@/components/mode-toggle"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { Toaster } from "sonner"
 
 const SITE_TITLE = "Naveen's Tools — Browser-based utilities, zero data sent"
 const SITE_DESCRIPTION =
@@ -253,6 +254,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                             </div>
                         </div>
                     </footer>
+                    <Toaster richColors closeButton />
                 </ThemeProvider>
 
                 <TanStackDevtools
