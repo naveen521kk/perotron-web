@@ -27,6 +27,8 @@ import {
     DndContext,
     closestCenter,
     PointerSensor,
+    TouchSensor,
+    KeyboardSensor,
     useSensor,
     useSensors,
     type DragEndEvent,
@@ -36,6 +38,7 @@ import {
 import {
     SortableContext,
     rectSortingStrategy,
+    sortableKeyboardCoordinates,
     useSortable,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
@@ -274,7 +277,18 @@ function MergePage() {
     // dnd-kit state
     const [activeId, setActiveId] = useState<string | null>(null)
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                // Give the user 250 ms to start moving before we claim the touch,
+                // so normal scrolling still works naturally.
+                delay: 250,
+                tolerance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
     )
 
     // Sort direction toggle state
@@ -719,7 +733,7 @@ function MergePage() {
                             Arrange PDFs
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Drag cards to reorder · Drop new PDFs anywhere to add them
+                            Drag or long-press cards to reorder · Drop new PDFs anywhere to add them
                         </p>
                     </div>
                 </div>
