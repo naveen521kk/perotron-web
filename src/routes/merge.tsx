@@ -3,19 +3,19 @@ import {
     FileStack,
     UploadCloud,
     Merge,
-    ArrowUpDown,
     SortAsc,
     SortDesc,
-    Weight,
     Plus,
     Trash2,
-    GripVertical,
     X,
+    Loader2,
+    Download,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useMergeStore } from "@/store/merge-store"
-import { lazy, Suspense, useCallback, useRef, useState } from "react"
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
     DndContext,
     closestCenter,
@@ -216,6 +216,8 @@ function ArrangeDropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
 
 /* ── Main page ───────────────────────────────────────────────────── */
 
+type MergeStatus = "idle" | "loading" | "merging" | "done" | "error"
+
 function MergePage() {
     const files = useMergeStore((s) => s.files)
     const addFiles = useMergeStore((s) => s.addFiles)
@@ -226,6 +228,38 @@ function MergePage() {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const addMoreInputRef = useRef<HTMLInputElement>(null)
+
+    // Merge state
+    const [mergeStatus, setMergeStatus] = useState<MergeStatus>("idle")
+    const [statusMessage, setStatusMessage] = useState<string>("")
+    // Singleton worker — created on first mount, terminated on unmount
+    const workerRef = useRef<Worker | null>(null)
+    const mergeIdRef = useRef(0)
+
+    useEffect(() => {
+        const worker = new Worker(
+            new URL("../lib/pdf-worker.ts", import.meta.url),
+            { type: "module" }
+        )
+        workerRef.current = worker
+
+        // Forward GA analytics events posted from the worker to gtag on the main thread
+        const analyticsHandler = (e: MessageEvent) => {
+            if (e.data?.type !== "analytics") return
+            const { event, params } = e.data
+            console.log("Sending event to gtag.", { event, params, window })
+            if (typeof window !== "undefined" && typeof (window as Window & { gtag?: Function }).gtag === "function") {
+                ;(window as unknown as { gtag: Function }).gtag("event", event, params)
+            } else {
+                console.log("Gtag not found; might be blocked due to privacy settings of browser.")
+            }
+        }
+        worker.addEventListener("message", analyticsHandler)
+        return () => {
+            worker.terminate()
+            workerRef.current = null
+        }
+    }, [])
 
     // dnd-kit state
     const [activeId, setActiveId] = useState<string | null>(null)
@@ -417,12 +451,82 @@ function MergePage() {
                 <Button
                     size="lg"
                     className="w-full gap-2 rounded-xl"
-                    onClick={() => {
-                        // Merge functionality will be implemented later
+                    disabled={mergeStatus === "loading" || mergeStatus === "merging"}
+                    onClick={async () => {
+                        const worker = workerRef.current
+                        if (!worker || files.length === 0) return
+
+                        const id = ++mergeIdRef.current
+                        setMergeStatus("loading")
+                        setStatusMessage("Reading files…")
+
+                        try {
+                            // Read all files as ArrayBuffers
+                            const buffers = await Promise.all(
+                                files.map((pf) => pf.file.arrayBuffer())
+                            )
+
+                            setMergeStatus("merging")
+                            setStatusMessage("Merging…")
+
+                            // Set up one-time listener for this specific merge id
+                            const result = await new Promise<ArrayBuffer>(
+                                (resolve, reject) => {
+                                    const handler = (e: MessageEvent) => {
+                                        const data = e.data
+                                        // Only handle messages belonging to this merge request
+                                        if (data.id !== id) return
+                                        if (data.type === "status") {
+                                            setStatusMessage(data.message)
+                                            return
+                                        }
+                                        worker.removeEventListener("message", handler)
+                                        if (data.type === "done") resolve(data.buffer)
+                                        else if (data.type === "error") reject(new Error(data.message))
+                                    }
+                                    worker.addEventListener("message", handler)
+                                    // Transfer buffers to the worker (zero-copy)
+                                    worker.postMessage({ type: "merge", id, buffers }, buffers)
+                                }
+                            )
+
+                            // Trigger download
+                            const blob = new Blob([result], { type: "application/pdf" })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement("a")
+                            a.href = url
+                            a.download = "merged.pdf"
+                            a.click()
+                            URL.revokeObjectURL(url)
+
+                            setMergeStatus("done")
+                            toast.success("PDFs merged successfully!", {
+                                description: `${files.length} files combined into merged.pdf`,
+                            })
+                            // Reset back to idle after a moment
+                            setTimeout(() => setMergeStatus("idle"), 3000)
+                        } catch (err: unknown) {
+                            const msg = err instanceof Error ? err.message : String(err)
+                            setMergeStatus("error")
+                            toast.error("Merge failed", { description: msg })
+                            setTimeout(() => setMergeStatus("idle"), 3000)
+                        }
                     }}
                 >
-                    <Merge className="size-4" />
-                    Merge PDFs
+                    {mergeStatus === "loading" || mergeStatus === "merging" ? (
+                        <Loader2 className="size-4 animate-spin" />
+                    ) : mergeStatus === "done" ? (
+                        <Download className="size-4" />
+                    ) : (
+                        <Merge className="size-4" />
+                    )}
+                    {mergeStatus === "loading"
+                        ? "Initialising…"
+                        : mergeStatus === "merging"
+                          ? statusMessage
+                          : mergeStatus === "done"
+                            ? "Done!"
+                            : "Merge PDFs"}
                 </Button>
 
                 <Separator />
