@@ -10,9 +10,16 @@ import {
     X,
     Loader2,
     Download,
+    PanelLeft,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet"
 import { useMergeStore } from "@/store/merge-store"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -236,6 +243,9 @@ function MergePage() {
     const workerRef = useRef<Worker | null>(null)
     const mergeIdRef = useRef(0)
 
+    // Mobile sidebar state
+    const [sidebarOpen, setSidebarOpen] = useState(false)
+
     useEffect(() => {
         const worker = new Worker(
             new URL("../lib/pdf-worker.ts", import.meta.url),
@@ -317,6 +327,86 @@ function MergePage() {
         const toIndex = files.findIndex((f) => f.id === over.id)
         if (fromIndex !== -1 && toIndex !== -1) reorderFiles(fromIndex, toIndex)
     }
+
+    const handleMerge = useCallback(async () => {
+        const worker = workerRef.current
+        if (!worker || files.length === 0) return
+
+        const id = ++mergeIdRef.current
+        setMergeStatus("loading")
+        setStatusMessage("Reading files…")
+
+        try {
+            // Read all files as ArrayBuffers
+            const buffers = await Promise.all(
+                files.map((pf) => pf.file.arrayBuffer())
+            )
+
+            setMergeStatus("merging")
+            setStatusMessage("Merging…")
+
+            // Set up one-time listener for this specific merge id
+            const result = await new Promise<ArrayBuffer>(
+                (resolve, reject) => {
+                    const handler = (e: MessageEvent) => {
+                        const data = e.data
+                        // Only handle messages belonging to this merge request
+                        if (data.id !== id) return
+                        if (data.type === "status") {
+                            setStatusMessage(data.message)
+                            return
+                        }
+                        worker.removeEventListener("message", handler)
+                        if (data.type === "done") resolve(data.buffer)
+                        else if (data.type === "error") reject(new Error(data.message))
+                    }
+                    worker.addEventListener("message", handler)
+                    // Transfer buffers to the worker (zero-copy)
+                    worker.postMessage({ type: "merge", id, buffers }, buffers)
+                }
+            )
+
+            // Trigger download
+            const blob = new Blob([result], { type: "application/pdf" })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = "merged.pdf"
+            a.click()
+            URL.revokeObjectURL(url)
+
+            setMergeStatus("done")
+            toast.success("PDFs merged successfully!", {
+                description: `${files.length} files combined into merged.pdf`,
+            })
+            // Reset back to idle after a moment
+            setTimeout(() => setMergeStatus("idle"), 3000)
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err)
+            setMergeStatus("error")
+            toast.error("Merge failed", { description: msg })
+            setTimeout(() => setMergeStatus("idle"), 3000)
+        }
+    }, [files])
+
+    const mergeButtonContent = (
+        <>
+            {mergeStatus === "loading" || mergeStatus === "merging" ? (
+                <Loader2 className="size-4 animate-spin" />
+            ) : mergeStatus === "done" ? (
+                <Download className="size-4" />
+            ) : (
+                <Merge className="size-4" />
+            )}
+            {mergeStatus === "loading"
+                ? "Initialising…"
+                : mergeStatus === "merging"
+                  ? statusMessage
+                  : mergeStatus === "done"
+                    ? "Done!"
+                    : "Merge PDFs"}
+        </>
+    )
 
     const hasFiles = files.length > 0
 
@@ -429,8 +519,8 @@ function MergePage() {
                 onChange={handleFileInputChange}
             />
 
-            {/* ── Left sidebar ── */}
-            <aside className="sticky top-14 flex h-[calc(100vh-3.5rem)] w-64 shrink-0 flex-col gap-4 border-r border-border bg-card p-5">
+            {/* ── Left sidebar (desktop) ── */}
+            <aside className="sticky top-14 hidden md:flex h-[calc(100vh-3.5rem)] w-64 shrink-0 flex-col gap-4 border-r border-border bg-card p-5">
                 {/* File count */}
                 <div className="flex flex-col gap-1">
                     <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
@@ -452,81 +542,9 @@ function MergePage() {
                     size="lg"
                     className="w-full gap-2 rounded-xl"
                     disabled={mergeStatus === "loading" || mergeStatus === "merging"}
-                    onClick={async () => {
-                        const worker = workerRef.current
-                        if (!worker || files.length === 0) return
-
-                        const id = ++mergeIdRef.current
-                        setMergeStatus("loading")
-                        setStatusMessage("Reading files…")
-
-                        try {
-                            // Read all files as ArrayBuffers
-                            const buffers = await Promise.all(
-                                files.map((pf) => pf.file.arrayBuffer())
-                            )
-
-                            setMergeStatus("merging")
-                            setStatusMessage("Merging…")
-
-                            // Set up one-time listener for this specific merge id
-                            const result = await new Promise<ArrayBuffer>(
-                                (resolve, reject) => {
-                                    const handler = (e: MessageEvent) => {
-                                        const data = e.data
-                                        // Only handle messages belonging to this merge request
-                                        if (data.id !== id) return
-                                        if (data.type === "status") {
-                                            setStatusMessage(data.message)
-                                            return
-                                        }
-                                        worker.removeEventListener("message", handler)
-                                        if (data.type === "done") resolve(data.buffer)
-                                        else if (data.type === "error") reject(new Error(data.message))
-                                    }
-                                    worker.addEventListener("message", handler)
-                                    // Transfer buffers to the worker (zero-copy)
-                                    worker.postMessage({ type: "merge", id, buffers }, buffers)
-                                }
-                            )
-
-                            // Trigger download
-                            const blob = new Blob([result], { type: "application/pdf" })
-                            const url = URL.createObjectURL(blob)
-                            const a = document.createElement("a")
-                            a.href = url
-                            a.download = "merged.pdf"
-                            a.click()
-                            URL.revokeObjectURL(url)
-
-                            setMergeStatus("done")
-                            toast.success("PDFs merged successfully!", {
-                                description: `${files.length} files combined into merged.pdf`,
-                            })
-                            // Reset back to idle after a moment
-                            setTimeout(() => setMergeStatus("idle"), 3000)
-                        } catch (err: unknown) {
-                            const msg = err instanceof Error ? err.message : String(err)
-                            setMergeStatus("error")
-                            toast.error("Merge failed", { description: msg })
-                            setTimeout(() => setMergeStatus("idle"), 3000)
-                        }
-                    }}
+                    onClick={handleMerge}
                 >
-                    {mergeStatus === "loading" || mergeStatus === "merging" ? (
-                        <Loader2 className="size-4 animate-spin" />
-                    ) : mergeStatus === "done" ? (
-                        <Download className="size-4" />
-                    ) : (
-                        <Merge className="size-4" />
-                    )}
-                    {mergeStatus === "loading"
-                        ? "Initialising…"
-                        : mergeStatus === "merging"
-                          ? statusMessage
-                          : mergeStatus === "done"
-                            ? "Done!"
-                            : "Merge PDFs"}
+                    {mergeButtonContent}
                 </Button>
 
                 <Separator />
@@ -591,10 +609,111 @@ function MergePage() {
                 </div>
             </aside>
 
+            {/* ── Mobile sidebar (Sheet) ── */}
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetContent side="left" className="w-72 flex flex-col gap-4 p-5">
+                    <SheetHeader>
+                        <SheetTitle className="text-left text-sm font-semibold tracking-widest text-muted-foreground uppercase">
+                            Files to merge
+                        </SheetTitle>
+                    </SheetHeader>
+
+                    {/* File count */}
+                    <div className="flex flex-col gap-1">
+                        <p className="text-3xl font-bold text-foreground">{files.length}</p>
+                        <p className="text-xs text-muted-foreground">
+                            {files.reduce((s, f) => s + f.file.size, 0) > 0
+                                ? formatBytes(files.reduce((s, f) => s + f.file.size, 0))
+                                : "—"}{" "}
+                            total
+                        </p>
+                    </div>
+
+                    <Separator />
+
+                    {/* Sort options */}
+                    <div className="flex flex-col gap-2">
+                        <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                            Sort
+                        </p>
+                        <Button
+                            variant={lastSort === "name" ? "secondary" : "outline"}
+                            size="sm"
+                            className="w-full justify-start gap-2"
+                            onClick={handleSortByName}
+                        >
+                            {lastSort === "name" && nameSortDir === "desc" ? (
+                                <SortDesc className="size-4" />
+                            ) : (
+                                <SortAsc className="size-4" />
+                            )}
+                            By filename
+                        </Button>
+                        <Button
+                            variant={lastSort === "size" ? "secondary" : "outline"}
+                            size="sm"
+                            className="w-full justify-start gap-2"
+                            onClick={handleSortBySize}
+                        >
+                            {lastSort === "size" && sizeSortDir === "desc" ? (
+                                <SortDesc className="size-4" />
+                            ) : (
+                                <SortAsc className="size-4" />
+                            )}
+                            By file size
+                        </Button>
+                    </div>
+
+                    <Separator />
+
+                    {/* Add more */}
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full justify-start gap-2"
+                        onClick={() => {
+                            addMoreInputRef.current?.click()
+                            setSidebarOpen(false)
+                        }}
+                    >
+                        <Plus className="size-4" />
+                        Add more PDFs
+                    </Button>
+
+                    {/* Clear all — push to bottom */}
+                    <div className="mt-auto">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
+                            onClick={() => {
+                                clearAll()
+                                setSidebarOpen(false)
+                            }}
+                        >
+                            <Trash2 className="size-4" />
+                            Clear all
+                        </Button>
+                    </div>
+                </SheetContent>
+                {/* SheetTrigger is placed in toolbar below — use open/onOpenChange instead */}
+            </Sheet>
+
             {/* ── Arrange grid ── */}
-            <div className="flex flex-1 flex-col p-6">
+            <div className="flex flex-1 flex-col p-4 md:p-6">
                 {/* Toolbar */}
-                <div className="mb-5 flex items-center justify-between">
+                <div className="mb-5 flex items-center justify-between gap-3">
+                    {/* Mobile: sidebar toggle */}
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0 md:hidden"
+                        onClick={() => setSidebarOpen(true)}
+                        aria-label="Open options"
+                    >
+                        <PanelLeft className="size-4" />
+                    </Button>
+
                     <div className="flex flex-col gap-0.5">
                         <h1 className="text-xl font-semibold text-foreground">
                             Arrange PDFs
@@ -618,7 +737,7 @@ function MergePage() {
                         items={files.map((f) => f.id)}
                         strategy={rectSortingStrategy}
                     >
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 md:gap-4">
                             {files.map((pf, index) => (
                                 <SortablePdfCard
                                     key={pf.id}
@@ -640,6 +759,18 @@ function MergePage() {
                         ) : null}
                     </DragOverlay>
                 </DndContext>
+
+                {/* Mobile: Merge button at bottom of page */}
+                <div className="mt-8 md:hidden">
+                    <Button
+                        size="lg"
+                        className="w-full gap-2 rounded-xl"
+                        disabled={mergeStatus === "loading" || mergeStatus === "merging"}
+                        onClick={handleMerge}
+                    >
+                        {mergeButtonContent}
+                    </Button>
+                </div>
             </div>
         </div>
     )
