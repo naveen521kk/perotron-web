@@ -23,6 +23,7 @@ import {
 import { useMergeStore } from "@/store/merge-store"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import { usePostHog } from "@posthog/react"
 import {
     DndContext,
     closestCenter,
@@ -252,6 +253,7 @@ function MergePage() {
     const sortByName = useMergeStore((s) => s.sortByName)
     const sortBySize = useMergeStore((s) => s.sortBySize)
     const clearAll = useMergeStore((s) => s.clearAll)
+    const posthog = usePostHog()
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const addMoreInputRef = useRef<HTMLInputElement>(null)
@@ -273,7 +275,7 @@ function MergePage() {
         )
         workerRef.current = worker
 
-        // Forward GA analytics events posted from the worker to gtag on the main thread
+        // Forward analytics events posted from the worker to gtag and PostHog on the main thread
         const analyticsHandler = (e: MessageEvent) => {
             if (e.data?.type !== "analytics") return
             const { event, params } = e.data
@@ -293,13 +295,14 @@ function MergePage() {
                     "Gtag not found; might be blocked due to privacy settings of browser."
                 )
             }
+            posthog?.capture(event, params)
         }
         worker.addEventListener("message", analyticsHandler)
         return () => {
             worker.terminate()
             workerRef.current = null
         }
-    }, [])
+    }, [posthog])
 
     // dnd-kit state
     const [activeId, setActiveId] = useState<string | null>(null)

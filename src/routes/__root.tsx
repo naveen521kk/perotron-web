@@ -18,12 +18,20 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Toaster } from "sonner"
+import { PostHogProvider } from "@posthog/react"
 
 const SITE_TITLE = "Naveen's Tools — Browser-based utilities, zero data sent"
 const SITE_DESCRIPTION =
     "Free, open-source browser utilities by Naveen. Merge and split PDFs without uploading a single byte. Licensed under GNU GPLv3."
 const SITE_URL = "https://tools.naveenmk.me"
 const SITE_IMAGE = "/banner.png"
+
+const posthogOptions = {
+    api_host: import.meta.env.VITE_POSTHOG_HOST,
+    ui_host: "https://us.posthog.com",
+    defaults: "2026-05-30",
+    capture_exceptions: true,
+} as const
 
 export const Route = createRootRoute({
     head: () => ({
@@ -181,100 +189,105 @@ gtag('config', 'G-F61KVD3XWG');`,
                 />
             </head>
             <body className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20">
-                <ThemeProvider defaultTheme="system" storageKey="theme">
-                    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
-                        <div className="container mx-auto flex h-14 items-center gap-6 px-4 md:px-6">
-                            <Link
-                                to="/"
-                                className="flex shrink-0 items-center gap-2 text-base font-semibold transition-opacity hover:opacity-80"
-                            >
-                                <Logo />
-                                <span className="tracking-tight">
-                                    Naveen's Tools
-                                </span>
-                            </Link>
-
-                            <Separator
-                                orientation="vertical"
-                                className="my-auto hidden h-7 md:block"
-                            />
-
-                            <nav className="hidden items-center gap-5 md:flex">
+                <PostHogProvider
+                    apiKey={import.meta.env.VITE_POSTHOG_PROJECT_TOKEN}
+                    options={posthogOptions}
+                >
+                    <ThemeProvider defaultTheme="system" storageKey="theme">
+                        <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
+                            <div className="container mx-auto flex h-14 items-center gap-6 px-4 md:px-6">
                                 <Link
-                                    to="/merge"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
+                                    to="/"
+                                    className="flex shrink-0 items-center gap-2 text-base font-semibold transition-opacity hover:opacity-80"
                                 >
-                                    Merge PDF
+                                    <Logo />
+                                    <span className="tracking-tight">
+                                        Naveen's Tools
+                                    </span>
                                 </Link>
-                                <Link
-                                    to="/split"
-                                    className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
-                                >
-                                    Split PDF
-                                </Link>
-                            </nav>
 
-                            <div className="ml-auto flex items-center gap-2">
-                                <ModeToggle />
-                                <a
-                                    href="https://github.com/naveen521kk/tools"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={cn(
-                                        buttonVariants({
-                                            variant: "ghost",
-                                            size: "sm",
-                                        }),
-                                        "flex items-center justify-center gap-2 text-center text-xs"
-                                    )}
-                                    aria-label="View source on GitHub"
-                                >
-                                    <SiGithub
-                                        className="size-5"
-                                        title="Open Github"
-                                    />
-                                </a>
-                            </div>
-                        </div>
-                    </header>
-
-                    <main className="flex flex-1 flex-col">{children}</main>
-
-                    <footer className="mt-auto border-t border-border">
-                        <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground md:flex-row md:px-6">
-                            <div className="flex items-center gap-2">
-                                <Logo />
-                                <span>Naveen's Tools</span>
                                 <Separator
                                     orientation="vertical"
-                                    className="my-auto h-3.5"
+                                    className="my-auto hidden h-7 md:block"
                                 />
-                                <span>Licensed under GNU GPLv3</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="flex size-1.5 shrink-0 rounded-full bg-green-500" />
-                                <span>
-                                    All processing happens in your browser — no
-                                    data is ever sent to a server.
-                                </span>
-                            </div>
-                        </div>
-                    </footer>
-                    <Toaster richColors closeButton />
-                </ThemeProvider>
 
-                <TanStackDevtools
-                    config={{
-                        position: "bottom-right",
-                    }}
-                    plugins={[
-                        {
-                            name: "Tanstack Router",
-                            render: <TanStackRouterDevtoolsPanel />,
-                        },
-                    ]}
-                />
-                <Scripts />
+                                <nav className="hidden items-center gap-5 md:flex">
+                                    <Link
+                                        to="/merge"
+                                        className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
+                                    >
+                                        Merge PDF
+                                    </Link>
+                                    <Link
+                                        to="/split"
+                                        className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
+                                    >
+                                        Split PDF
+                                    </Link>
+                                </nav>
+
+                                <div className="ml-auto flex items-center gap-2">
+                                    <ModeToggle />
+                                    <a
+                                        href="https://github.com/naveen521kk/tools"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={cn(
+                                            buttonVariants({
+                                                variant: "ghost",
+                                                size: "sm",
+                                            }),
+                                            "flex items-center justify-center gap-2 text-center text-xs"
+                                        )}
+                                        aria-label="View source on GitHub"
+                                    >
+                                        <SiGithub
+                                            className="size-5"
+                                            title="Open Github"
+                                        />
+                                    </a>
+                                </div>
+                            </div>
+                        </header>
+
+                        <main className="flex flex-1 flex-col">{children}</main>
+
+                        <footer className="mt-auto border-t border-border">
+                            <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground md:flex-row md:px-6">
+                                <div className="flex items-center gap-2">
+                                    <Logo />
+                                    <span>Naveen's Tools</span>
+                                    <Separator
+                                        orientation="vertical"
+                                        className="my-auto h-3.5"
+                                    />
+                                    <span>Licensed under GNU GPLv3</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="flex size-1.5 shrink-0 rounded-full bg-green-500" />
+                                    <span>
+                                        All processing happens in your browser —
+                                        no data is ever sent to a server.
+                                    </span>
+                                </div>
+                            </div>
+                        </footer>
+                        <Toaster richColors closeButton />
+                    </ThemeProvider>
+
+                    <TanStackDevtools
+                        config={{
+                            position: "bottom-right",
+                        }}
+                        plugins={[
+                            {
+                                name: "Tanstack Router",
+                                render: <TanStackRouterDevtoolsPanel />,
+                            },
+                        ]}
+                    />
+                    <Scripts />
+                </PostHogProvider>
             </body>
         </html>
     )
