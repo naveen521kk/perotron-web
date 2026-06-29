@@ -86,9 +86,7 @@ export const Route = createFileRoute("/merge")({
                     "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
             },
         ],
-        links: [
-            { rel: "canonical", href: "https://tools.naveenmk.me/merge" },
-        ],
+        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/merge" }],
     }),
     component: MergePage,
 })
@@ -118,8 +116,14 @@ function SortablePdfCard({
     overlay?: boolean
 }) {
     const removeFile = useMergeStore((s) => s.removeFile)
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-        useSortable({ id: pdfFile.id })
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: pdfFile.id })
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -156,18 +160,22 @@ function SortablePdfCard({
             )}
 
             {/* Order badge */}
-            <div className="absolute top-2 left-2 z-10 rounded-md bg-primary px-2 py-1 text-[10px] font-bold tabular-nums text-primary-foreground">
+            <div className="absolute top-2 left-2 z-10 rounded-md bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground tabular-nums">
                 {index + 1}
             </div>
 
             {/* Thumbnail */}
-            <div className="bg-muted/30 p-2 flex items-center justify-center">
+            <div className="flex items-center justify-center bg-muted/30 p-2">
                 <Suspense
                     fallback={
                         <div className="aspect-[3/4] w-full animate-pulse rounded-md bg-muted" />
                     }
                 >
-                    <PdfThumbnail file={pdfFile.file} width={180} className="w-full" />
+                    <PdfThumbnail
+                        file={pdfFile.file}
+                        width={180}
+                        className="w-full"
+                    />
                 </Suspense>
             </div>
 
@@ -219,7 +227,9 @@ function ArrangeDropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
             <div className="flex size-20 items-center justify-center rounded-full border-4 border-primary bg-primary/10 text-primary">
                 <UploadCloud className="size-9" />
             </div>
-            <p className="text-xl font-semibold text-foreground">Drop PDFs to add them</p>
+            <p className="text-xl font-semibold text-foreground">
+                Drop PDFs to add them
+            </p>
         </div>
     )
 }
@@ -261,10 +271,20 @@ function MergePage() {
             if (e.data?.type !== "analytics") return
             const { event, params } = e.data
             console.log("Sending event to gtag.", { event, params, window })
-            if (typeof window !== "undefined" && typeof (window as Window & { gtag?: Function }).gtag === "function") {
-                ;(window as unknown as { gtag: Function }).gtag("event", event, params)
+            if (
+                typeof window !== "undefined" &&
+                typeof (window as Window & { gtag?: Function }).gtag ===
+                    "function"
+            ) {
+                ;(window as unknown as { gtag: Function }).gtag(
+                    "event",
+                    event,
+                    params
+                )
             } else {
-                console.log("Gtag not found; might be blocked due to privacy settings of browser.")
+                console.log(
+                    "Gtag not found; might be blocked due to privacy settings of browser."
+                )
             }
         }
         worker.addEventListener("message", analyticsHandler)
@@ -297,14 +317,16 @@ function MergePage() {
     const [lastSort, setLastSort] = useState<"name" | "size" | null>(null)
 
     const handleSortByName = () => {
-        const nextDir = lastSort === "name" && nameSortDir === "asc" ? "desc" : "asc"
+        const nextDir =
+            lastSort === "name" && nameSortDir === "asc" ? "desc" : "asc"
         setNameSortDir(nextDir)
         setLastSort("name")
         sortByName(nextDir)
     }
 
     const handleSortBySize = () => {
-        const nextDir = lastSort === "size" && sizeSortDir === "asc" ? "desc" : "asc"
+        const nextDir =
+            lastSort === "size" && sizeSortDir === "asc" ? "desc" : "asc"
         setSizeSortDir(nextDir)
         setLastSort("size")
         sortBySize(nextDir)
@@ -314,7 +336,9 @@ function MergePage() {
     const [nativeDragOver, setNativeDragOver] = useState(false)
 
     const activeFile = activeId ? files.find((f) => f.id === activeId) : null
-    const activeIndex = activeId ? files.findIndex((f) => f.id === activeId) : -1
+    const activeIndex = activeId
+        ? files.findIndex((f) => f.id === activeId)
+        : -1
 
     /* handlers */
     const handleInitialDrop = useCallback(
@@ -327,7 +351,7 @@ function MergePage() {
     )
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log({e})
+        console.log({ e })
         const picked = acceptPdfFiles(e.target.files)
         if (picked.length) addFiles(picked)
         e.target.value = ""
@@ -360,25 +384,24 @@ function MergePage() {
             setStatusMessage("Merging…")
 
             // Set up one-time listener for this specific merge id
-            const result = await new Promise<ArrayBuffer>(
-                (resolve, reject) => {
-                    const handler = (e: MessageEvent) => {
-                        const data = e.data
-                        // Only handle messages belonging to this merge request
-                        if (data.id !== id) return
-                        if (data.type === "status") {
-                            setStatusMessage(data.message)
-                            return
-                        }
-                        worker.removeEventListener("message", handler)
-                        if (data.type === "done") resolve(data.buffer)
-                        else if (data.type === "error") reject(new Error(data.message))
+            const result = await new Promise<ArrayBuffer>((resolve, reject) => {
+                const handler = (e: MessageEvent) => {
+                    const data = e.data
+                    // Only handle messages belonging to this merge request
+                    if (data.id !== id) return
+                    if (data.type === "status") {
+                        setStatusMessage(data.message)
+                        return
                     }
-                    worker.addEventListener("message", handler)
-                    // Transfer buffers to the worker (zero-copy)
-                    worker.postMessage({ type: "merge", id, buffers }, buffers)
+                    worker.removeEventListener("message", handler)
+                    if (data.type === "done") resolve(data.buffer)
+                    else if (data.type === "error")
+                        reject(new Error(data.message))
                 }
-            )
+                worker.addEventListener("message", handler)
+                // Transfer buffers to the worker (zero-copy)
+                worker.postMessage({ type: "merge", id, buffers }, buffers)
+            })
 
             // Trigger download
             const blob = new Blob([result], { type: "application/pdf" })
@@ -437,8 +460,9 @@ function MergePage() {
                         Merge PDFs
                     </h1>
                     <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
-                        Drop your files below. Arrange them in the order you want, then
-                        download the merged result. Nothing is uploaded.
+                        Drop your files below. Arrange them in the order you
+                        want, then download the merged result. Nothing is
+                        uploaded.
                     </p>
                 </div>
 
@@ -534,16 +558,20 @@ function MergePage() {
             />
 
             {/* ── Left sidebar (desktop) ── */}
-            <aside className="sticky top-14 hidden md:flex h-[calc(100vh-3.5rem)] w-64 shrink-0 flex-col gap-4 border-r border-border bg-card p-5">
+            <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-64 shrink-0 flex-col gap-4 border-r border-border bg-card p-5 md:flex">
                 {/* File count */}
                 <div className="flex flex-col gap-1">
                     <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                         Files to merge
                     </p>
-                    <p className="text-3xl font-bold text-foreground">{files.length}</p>
+                    <p className="text-3xl font-bold text-foreground">
+                        {files.length}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                         {files.reduce((s, f) => s + f.file.size, 0) > 0
-                            ? formatBytes(files.reduce((s, f) => s + f.file.size, 0))
+                            ? formatBytes(
+                                  files.reduce((s, f) => s + f.file.size, 0)
+                              )
                             : "—"}{" "}
                         total
                     </p>
@@ -555,7 +583,9 @@ function MergePage() {
                 <Button
                     size="lg"
                     className="w-full gap-2 rounded-xl"
-                    disabled={mergeStatus === "loading" || mergeStatus === "merging"}
+                    disabled={
+                        mergeStatus === "loading" || mergeStatus === "merging"
+                    }
                     onClick={handleMerge}
                 >
                     {mergeButtonContent}
@@ -625,7 +655,10 @@ function MergePage() {
 
             {/* ── Mobile sidebar (Sheet) ── */}
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetContent side="left" className="w-72 flex flex-col gap-4 p-5">
+                <SheetContent
+                    side="left"
+                    className="flex w-72 flex-col gap-4 p-5"
+                >
                     <SheetHeader>
                         <SheetTitle className="text-left text-sm font-semibold tracking-widest text-muted-foreground uppercase">
                             Files to merge
@@ -634,10 +667,14 @@ function MergePage() {
 
                     {/* File count */}
                     <div className="flex flex-col gap-1">
-                        <p className="text-3xl font-bold text-foreground">{files.length}</p>
+                        <p className="text-3xl font-bold text-foreground">
+                            {files.length}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                             {files.reduce((s, f) => s + f.file.size, 0) > 0
-                                ? formatBytes(files.reduce((s, f) => s + f.file.size, 0))
+                                ? formatBytes(
+                                      files.reduce((s, f) => s + f.file.size, 0)
+                                  )
                                 : "—"}{" "}
                             total
                         </p>
@@ -651,7 +688,9 @@ function MergePage() {
                             Sort
                         </p>
                         <Button
-                            variant={lastSort === "name" ? "secondary" : "outline"}
+                            variant={
+                                lastSort === "name" ? "secondary" : "outline"
+                            }
                             size="sm"
                             className="w-full justify-start gap-2"
                             onClick={handleSortByName}
@@ -664,7 +703,9 @@ function MergePage() {
                             By filename
                         </Button>
                         <Button
-                            variant={lastSort === "size" ? "secondary" : "outline"}
+                            variant={
+                                lastSort === "size" ? "secondary" : "outline"
+                            }
                             size="sm"
                             className="w-full justify-start gap-2"
                             onClick={handleSortBySize}
@@ -733,7 +774,8 @@ function MergePage() {
                             Arrange PDFs
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Drag or long-press cards to reorder · Drop new PDFs anywhere to add them
+                            Drag or long-press cards to reorder · Drop new PDFs
+                            anywhere to add them
                         </p>
                     </div>
                 </div>
@@ -751,7 +793,7 @@ function MergePage() {
                         items={files.map((f) => f.id)}
                         strategy={rectSortingStrategy}
                     >
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 md:gap-4">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-4">
                             {files.map((pf, index) => (
                                 <SortablePdfCard
                                     key={pf.id}
@@ -779,7 +821,10 @@ function MergePage() {
                     <Button
                         size="lg"
                         className="w-full gap-2 rounded-xl"
-                        disabled={mergeStatus === "loading" || mergeStatus === "merging"}
+                        disabled={
+                            mergeStatus === "loading" ||
+                            mergeStatus === "merging"
+                        }
                         onClick={handleMerge}
                     >
                         {mergeButtonContent}
