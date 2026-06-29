@@ -582,7 +582,7 @@ function MergePage() {
                 {/* Merge button */}
                 <Button
                     size="lg"
-                    className="w-full gap-2 rounded-xl"
+                    className="w-full gap-2"
                     disabled={
                         mergeStatus === "loading" || mergeStatus === "merging"
                     }
@@ -757,7 +757,7 @@ function MergePage() {
             {/* ── Arrange grid ── */}
             <div className="flex flex-1 flex-col p-4 md:p-6">
                 {/* Toolbar */}
-                <div className="mb-5 flex items-center justify-between gap-3">
+                <div className="mb-5 flex items-center justify-start gap-3">
                     {/* Mobile: sidebar toggle */}
                     <Button
                         variant="outline"
@@ -817,10 +817,10 @@ function MergePage() {
                 </DndContext>
 
                 {/* Mobile: Merge button at bottom of page */}
-                <div className="mt-8 md:hidden">
+                <div className="mt-8 md:hidden space-y-4">
                     <Button
                         size="lg"
-                        className="w-full gap-2 rounded-xl"
+                        className="w-full gap-2"
                         disabled={
                             mergeStatus === "loading" ||
                             mergeStatus === "merging"
@@ -828,6 +828,17 @@ function MergePage() {
                         onClick={handleMerge}
                     >
                         {mergeButtonContent}
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="lg"
+                        className="w-full gap-2"
+                        onClick={() => {
+                            addMoreInputRef.current?.click()
+                        }}
+                    >
+                        <Plus className="size-4" />
+                        Add more PDFs
                     </Button>
                 </div>
             </div>
