@@ -121,6 +121,12 @@ export const Route = createRootRoute({
                 async: true,
                 src: "https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG",
             },
+            // Google AdSense
+            {
+                async: true,
+                src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7183740147103241",
+                crossOrigin: "anonymous",
+            },
         ],
     }),
     notFoundComponent: () => (

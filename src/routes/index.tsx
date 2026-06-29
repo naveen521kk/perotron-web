@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { FileStack, Scissors,  ShieldCheck, Code2 } from "lucide-react"
+import { FileStack, Scissors, ShieldCheck, Code2 } from "lucide-react"
 import { SiGithub } from "@icons-pack/react-simple-icons"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -9,6 +9,13 @@ import {
     CardDescription,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { lazy } from "react"
+
+const FooterAdBanner = lazy(() =>
+    import("@/components/ad-banner").then((mod) => ({
+        default: mod.FooterAdBanner,
+    }))
+)
 
 export const Route = createFileRoute("/")({
     head: () => ({
@@ -44,96 +51,98 @@ export const Route = createFileRoute("/")({
                     "Merge PDFs, split PDFs, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
             },
         ],
-        links: [
-            { rel: "canonical", href: "https://tools.naveenmk.me/" },
-        ],
+        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/" }],
     }),
     component: HomePage,
 })
 
 function HomePage() {
     return (
-        <div className="flex w-full flex-1 flex-col items-center px-4">
-            {/* ── Hero ─────────────────────────────────────────────── */}
-            <section className="mx-auto flex w-full max-w-3xl animate-in flex-col items-center gap-6 pt-20 pb-12 text-center duration-700 fade-in slide-in-from-bottom-6">
-                <Badge
-                    variant="secondary"
-                    className="gap-1.5 px-3 py-1 text-xs font-semibold tracking-widest uppercase"
-                >
-                    <span className="flex size-1.5 rounded-full bg-amber-500" />
-                    Under active development
-                </Badge>
+        <>
+            <div className="flex w-full flex-1 flex-col items-center px-4">
+                {/* ── Hero ─────────────────────────────────────────────── */}
+                <section className="mx-auto flex w-full max-w-3xl animate-in flex-col items-center gap-6 pt-20 pb-12 text-center duration-700 fade-in slide-in-from-bottom-6">
+                    <Badge
+                        variant="secondary"
+                        className="gap-1.5 px-3 py-1 text-xs font-semibold tracking-widest uppercase"
+                    >
+                        <span className="flex size-1.5 rounded-full bg-amber-500" />
+                        Under active development
+                    </Badge>
 
-                <h1 className="text-5xl leading-[1.1] font-bold tracking-tight text-foreground md:text-[4rem]">
-                    Naveen's Tools
-                </h1>
+                    <h1 className="text-5xl leading-[1.1] font-bold tracking-tight text-foreground md:text-[4rem]">
+                        Naveen's Tools
+                    </h1>
 
-                <p className="max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-                    A personal set of browser utilities. Pick a tool, do the
-                    work — your files never leave your device.
-                </p>
+                    <p className="max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+                        A personal set of browser utilities. Pick a tool, do the
+                        work — your files never leave your device.
+                    </p>
 
-                {/* ── Trust strip — the signature element ── */}
-                <div className="mt-2 flex w-full flex-col items-center justify-center gap-0 overflow-hidden rounded-xl border border-border sm:flex-row sm:gap-0">
-                    <TrustPillar
-                        icon={<ShieldCheck className="size-4" />}
-                        label="Zero data sent"
-                        detail="Runs entirely in your browser"
-                    />
-                    <Separator
-                        orientation="vertical"
-                        className="hidden h-12 self-center sm:block my-auto"
-                    />
-                    <Separator
-                        orientation="horizontal"
-                        className="w-full sm:hidden"
-                    />
-                    <TrustPillar
-                        icon={<Code2 className="size-4" />}
-                        label="Open Source"
-                        detail="GNU GPLv3 licensed"
-                    />
-                    <Separator
-                        orientation="vertical"
-                        className="hidden h-12 self-center sm:block my-auto"
-                    />
-                    <Separator
-                        orientation="horizontal"
-                        className="w-full sm:hidden"
-                    />
-                    <TrustPillar
-                        icon={<SiGithub className="size-4" />}
-                        label="View the code"
-                        detail="github.com/naveen521kk/tools"
-                        href="https://github.com/naveen521kk/tools"
-                    />
-                </div>
-            </section>
+                    {/* ── Trust strip — the signature element ── */}
+                    <div className="mt-2 flex w-full flex-col items-center justify-center gap-0 overflow-hidden rounded-xl border border-border sm:flex-row sm:gap-0">
+                        <TrustPillar
+                            icon={<ShieldCheck className="size-4" />}
+                            label="Zero data sent"
+                            detail="Runs entirely in your browser"
+                        />
+                        <Separator
+                            orientation="vertical"
+                            className="my-auto hidden h-12 self-center sm:block"
+                        />
+                        <Separator
+                            orientation="horizontal"
+                            className="w-full sm:hidden"
+                        />
+                        <TrustPillar
+                            icon={<Code2 className="size-4" />}
+                            label="Open Source"
+                            detail="GNU GPLv3 licensed"
+                        />
+                        <Separator
+                            orientation="vertical"
+                            className="my-auto hidden h-12 self-center sm:block"
+                        />
+                        <Separator
+                            orientation="horizontal"
+                            className="w-full sm:hidden"
+                        />
+                        <TrustPillar
+                            icon={<SiGithub className="size-4" />}
+                            label="View the code"
+                            detail="github.com/naveen521kk/tools"
+                            href="https://github.com/naveen521kk/tools"
+                        />
+                    </div>
+                </section>
 
-            {/* ── Tools grid ───────────────────────────────────────── */}
-            <section className="mx-auto w-full max-w-3xl pb-20">
-                <p className="mb-5 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                    Available tools
-                </p>
-                <div className="grid gap-4 md:grid-cols-2">
-                    <ToolCard
-                        to="/merge"
-                        icon={<FileStack className="size-6" />}
-                        title="Merge PDF"
-                        description="Combine multiple PDFs into one document. Arrange them in the order you need, then download."
-                    />
-                    <ToolCard
-                        to="/split"
-                        icon={<Scissors className="size-6" />}
-                        title="Split PDF"
-                        description="Extract individual pages or split a large PDF into separate files, all without uploading anything."
-                    />
-                </div>
-                <p className="mt-6 text-center text-xs text-muted-foreground">
-                    More tools coming soon.
-                </p>
-            </section>
-        </div>
+                {/* ── Tools grid ───────────────────────────────────────── */}
+                <section className="mx-auto w-full max-w-3xl pb-20">
+                    <p className="mb-5 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                        Available tools
+                    </p>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <ToolCard
+                            to="/merge"
+                            icon={<FileStack className="size-6" />}
+                            title="Merge PDF"
+                            description="Combine multiple PDFs into one document. Arrange them in the order you need, then download."
+                        />
+                        <ToolCard
+                            to="/split"
+                            icon={<Scissors className="size-6" />}
+                            title="Split PDF"
+                            description="Extract individual pages or split a large PDF into separate files, all without uploading anything."
+                        />
+                    </div>
+                    <p className="mt-6 text-center text-xs text-muted-foreground">
+                        More tools coming soon.
+                    </p>
+                </section>
+            </div>
+            {/* ── Above-footer ad slot ── */}
+            <FooterAdBanner />
+        </>
     )
 }
 
@@ -166,14 +175,14 @@ function TrustPillar({
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-1 transition-colors hover:bg-muted bg-card w-full"
+                className="flex w-full flex-1 bg-card transition-colors hover:bg-muted"
             >
                 {inner}
             </a>
         )
     }
 
-    return <div className="flex flex-1 bg-card w-full">{inner}</div>
+    return <div className="flex w-full flex-1 bg-card">{inner}</div>
 }
 
 function ToolCard({

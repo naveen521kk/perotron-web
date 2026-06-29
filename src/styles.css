@@ -139,3 +139,41 @@
         font-family: var(--font-heading);
     }
 }
+
+/* ── Ad Banner ───────────────────────────────────────────────────── */
+
+.ad-banner-container {
+    position: relative;
+    display: block;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    min-height: 100px;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .ad-banner-container {
+        padding: 8px;
+    }
+}
+
+/* Fallback: hidden by default; shown when the <ins> is empty (ad blocked) */
+.ad-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--muted-foreground);
+    padding: 0.75rem;
+    pointer-events: none;
+}
+
+/* When the <ins> tag remains empty (blocked), reveal the fallback */
+.ad-banner-container ins.adsbygoogle:empty + .ad-fallback {
+    display: flex;
+}
