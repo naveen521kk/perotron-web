@@ -1,4 +1,6 @@
-set shell := ["powershell", "-c"]
+# Use bash by default (works on Linux/macOS CI and Git Bash on Windows)
+# Override locally with `set shell := ["powershell", "-c"]` if needed
+set shell := ["bash", "-c"]
 
 # Default recipe
 default: build

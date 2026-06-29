@@ -21,7 +21,7 @@ defaults:
 jobs:
   build-and-deploy:
     name: Build & Deploy
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
