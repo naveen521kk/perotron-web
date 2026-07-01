@@ -188,7 +188,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                     }}
                 />
             </head>
-            <body className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20">
+            <body className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20 google-anno-skip">
                 <PostHogProvider
                     apiKey={import.meta.env.VITE_POSTHOG_PROJECT_TOKEN}
                     options={posthogOptions}
