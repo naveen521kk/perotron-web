@@ -279,21 +279,23 @@ function MergePage() {
         const analyticsHandler = (e: MessageEvent) => {
             if (e.data?.type !== "analytics") return
             const { event, params } = e.data
-            console.log("Sending event to gtag.", { event, params, window })
-            if (
-                typeof window !== "undefined" &&
-                typeof (window as Window & { gtag?: Function }).gtag ===
-                    "function"
-            ) {
-                ;(window as unknown as { gtag: Function }).gtag(
-                    "event",
-                    event,
-                    params
-                )
-            } else {
-                console.log(
-                    "Gtag not found; might be blocked due to privacy settings of browser."
-                )
+            if (import.meta.env.PROD) {
+                console.log("Sending event to gtag.", { event, params, window })
+                if (
+                    typeof window !== "undefined" &&
+                    typeof (window as Window & { gtag?: Function }).gtag ===
+                        "function"
+                ) {
+                    ;(window as unknown as { gtag: Function }).gtag(
+                        "event",
+                        event,
+                        params
+                    )
+                } else {
+                    console.log(
+                        "Gtag not found; might be blocked due to privacy settings of browser."
+                    )
+                }
             }
             posthog?.capture(event, params)
         }
