@@ -6,7 +6,7 @@ from pypdf import PdfReader, PdfWriter
 
 __version__ = "0.1.0"
 
-_TOOL_NAME = f"NaveenTools {__version__}"
+_TOOL_NAME = f"Perotron Web {__version__}"
 
 
 def _set_pdf_metadata(writer: PdfWriter) -> None:
