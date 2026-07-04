@@ -54,7 +54,7 @@ const PdfThumbnail = lazy(() =>
 
 /* ── Route ──────────────────────────────────────────────────────── */
 
-export const Route = createFileRoute("/split")({
+export const Route = createFileRoute("/pdf/split")({
     head: () => ({
         meta: [
             {
@@ -88,7 +88,7 @@ export const Route = createFileRoute("/split")({
                     "Extract individual pages or split a large PDF into separate files — no uploads required. Your PDF stays in your browser and is never sent to a server.",
             },
         ],
-        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/split" }],
+        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/pdf/split" }],
     }),
     component: SplitPage,
 })
@@ -155,7 +155,7 @@ function SplitPage() {
     // Initialise worker on mount
     useEffect(() => {
         const worker = new Worker(
-            new URL("../lib/pdf-worker.ts", import.meta.url),
+            new URL("../../lib/pdf-worker.ts", import.meta.url),
             { type: "module" }
         )
         workerRef.current = worker

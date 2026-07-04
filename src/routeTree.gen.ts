@@ -9,89 +9,101 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SplitRouteImport } from './routes/split'
-import { Route as QrGeneratorRouteImport } from './routes/qr-generator'
-import { Route as MergeRouteImport } from './routes/merge'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QrIndexRouteImport } from './routes/qr/index'
+import { Route as PdfIndexRouteImport } from './routes/pdf/index'
+import { Route as QrGeneratorRouteImport } from './routes/qr/generator'
+import { Route as PdfSplitRouteImport } from './routes/pdf/split'
+import { Route as PdfMergeRouteImport } from './routes/pdf/merge'
 
-const SplitRoute = SplitRouteImport.update({
-  id: '/split',
-  path: '/split',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QrGeneratorRoute = QrGeneratorRouteImport.update({
-  id: '/qr-generator',
-  path: '/qr-generator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MergeRoute = MergeRouteImport.update({
-  id: '/merge',
-  path: '/merge',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QrIndexRoute = QrIndexRouteImport.update({
+  id: '/qr/',
+  path: '/qr/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PdfIndexRoute = PdfIndexRouteImport.update({
+  id: '/pdf/',
+  path: '/pdf/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrGeneratorRoute = QrGeneratorRouteImport.update({
+  id: '/qr/generator',
+  path: '/qr/generator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PdfSplitRoute = PdfSplitRouteImport.update({
+  id: '/pdf/split',
+  path: '/pdf/split',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PdfMergeRoute = PdfMergeRouteImport.update({
+  id: '/pdf/merge',
+  path: '/pdf/merge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/merge': typeof MergeRoute
-  '/qr-generator': typeof QrGeneratorRoute
-  '/split': typeof SplitRoute
+  '/pdf/merge': typeof PdfMergeRoute
+  '/pdf/split': typeof PdfSplitRoute
+  '/qr/generator': typeof QrGeneratorRoute
+  '/pdf/': typeof PdfIndexRoute
+  '/qr/': typeof QrIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/merge': typeof MergeRoute
-  '/qr-generator': typeof QrGeneratorRoute
-  '/split': typeof SplitRoute
+  '/pdf/merge': typeof PdfMergeRoute
+  '/pdf/split': typeof PdfSplitRoute
+  '/qr/generator': typeof QrGeneratorRoute
+  '/pdf': typeof PdfIndexRoute
+  '/qr': typeof QrIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/merge': typeof MergeRoute
-  '/qr-generator': typeof QrGeneratorRoute
-  '/split': typeof SplitRoute
+  '/pdf/merge': typeof PdfMergeRoute
+  '/pdf/split': typeof PdfSplitRoute
+  '/qr/generator': typeof QrGeneratorRoute
+  '/pdf/': typeof PdfIndexRoute
+  '/qr/': typeof QrIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/merge' | '/qr-generator' | '/split'
+  fullPaths:
+    | '/'
+    | '/pdf/merge'
+    | '/pdf/split'
+    | '/qr/generator'
+    | '/pdf/'
+    | '/qr/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/merge' | '/qr-generator' | '/split'
-  id: '__root__' | '/' | '/merge' | '/qr-generator' | '/split'
+  to: '/' | '/pdf/merge' | '/pdf/split' | '/qr/generator' | '/pdf' | '/qr'
+  id:
+    | '__root__'
+    | '/'
+    | '/pdf/merge'
+    | '/pdf/split'
+    | '/qr/generator'
+    | '/pdf/'
+    | '/qr/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  MergeRoute: typeof MergeRoute
+  PdfMergeRoute: typeof PdfMergeRoute
+  PdfSplitRoute: typeof PdfSplitRoute
   QrGeneratorRoute: typeof QrGeneratorRoute
-  SplitRoute: typeof SplitRoute
+  PdfIndexRoute: typeof PdfIndexRoute
+  QrIndexRoute: typeof QrIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/split': {
-      id: '/split'
-      path: '/split'
-      fullPath: '/split'
-      preLoaderRoute: typeof SplitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/qr-generator': {
-      id: '/qr-generator'
-      path: '/qr-generator'
-      fullPath: '/qr-generator'
-      preLoaderRoute: typeof QrGeneratorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/merge': {
-      id: '/merge'
-      path: '/merge'
-      fullPath: '/merge'
-      preLoaderRoute: typeof MergeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -99,14 +111,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/qr/': {
+      id: '/qr/'
+      path: '/qr'
+      fullPath: '/qr/'
+      preLoaderRoute: typeof QrIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pdf/': {
+      id: '/pdf/'
+      path: '/pdf'
+      fullPath: '/pdf/'
+      preLoaderRoute: typeof PdfIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr/generator': {
+      id: '/qr/generator'
+      path: '/qr/generator'
+      fullPath: '/qr/generator'
+      preLoaderRoute: typeof QrGeneratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pdf/split': {
+      id: '/pdf/split'
+      path: '/pdf/split'
+      fullPath: '/pdf/split'
+      preLoaderRoute: typeof PdfSplitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pdf/merge': {
+      id: '/pdf/merge'
+      path: '/pdf/merge'
+      fullPath: '/pdf/merge'
+      preLoaderRoute: typeof PdfMergeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  MergeRoute: MergeRoute,
+  PdfMergeRoute: PdfMergeRoute,
+  PdfSplitRoute: PdfSplitRoute,
   QrGeneratorRoute: QrGeneratorRoute,
-  SplitRoute: SplitRoute,
+  PdfIndexRoute: PdfIndexRoute,
+  QrIndexRoute: QrIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

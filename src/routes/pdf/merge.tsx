@@ -60,7 +60,7 @@ const PdfThumbnail = lazy(() =>
     }))
 )
 
-export const Route = createFileRoute("/merge")({
+export const Route = createFileRoute("/pdf/merge")({
     head: () => ({
         meta: [
             {
@@ -94,7 +94,7 @@ export const Route = createFileRoute("/merge")({
                     "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
             },
         ],
-        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/merge" }],
+        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/pdf/merge" }],
     }),
     component: MergePage,
 })
@@ -203,45 +203,6 @@ function SortablePdfCard({
     )
 }
 
-/* ── Drop zone overlay (inside arrange area) ─────────────────────── */
-
-function ArrangeDropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
-    const [draggingOver, setDraggingOver] = useState(false)
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault()
-        // Only trigger if it's a file drag, not a dnd-kit reorder
-        if (e.dataTransfer.types.includes("Files")) {
-            setDraggingOver(true)
-        }
-    }
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault()
-        setDraggingOver(false)
-        const files = acceptPdfFiles(e.dataTransfer.files)
-        if (files.length) onFiles(files)
-    }
-
-    if (!draggingOver) return null
-
-    return (
-        <div
-            onDragOver={handleDragOver}
-            onDragLeave={() => setDraggingOver(false)}
-            onDrop={handleDrop}
-            className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-sm"
-        >
-            <div className="flex size-20 items-center justify-center rounded-full border-4 border-primary bg-primary/10 text-primary">
-                <UploadCloud className="size-9" />
-            </div>
-            <p className="text-xl font-semibold text-foreground">
-                Drop PDFs to add them
-            </p>
-        </div>
-    )
-}
-
 /* ── Main page ───────────────────────────────────────────────────── */
 
 type MergeStatus = "idle" | "loading" | "merging" | "done" | "error"
@@ -270,7 +231,7 @@ function MergePage() {
 
     useEffect(() => {
         const worker = new Worker(
-            new URL("../lib/pdf-worker.ts", import.meta.url),
+            new URL("../../lib/pdf-worker.ts", import.meta.url),
             { type: "module" }
         )
         workerRef.current = worker
