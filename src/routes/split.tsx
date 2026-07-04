@@ -58,7 +58,7 @@ export const Route = createFileRoute("/split")({
     head: () => ({
         meta: [
             {
-                title: "Split PDF — Extract Pages from PDF Free | Naveen's Tools",
+                title: "Split PDF — Extract Pages from PDF Free | Perotron Web",
             },
             {
                 name: "description",
@@ -68,7 +68,7 @@ export const Route = createFileRoute("/split")({
             {
                 property: "og:title",
                 content:
-                    "Split PDF — Extract Pages from PDF Free | Naveen's Tools",
+                    "Split PDF — Extract Pages from PDF Free | Perotron Web",
             },
             {
                 property: "og:description",
@@ -80,7 +80,7 @@ export const Route = createFileRoute("/split")({
             {
                 name: "twitter:title",
                 content:
-                    "Split PDF — Extract Pages from PDF Free | Naveen's Tools",
+                    "Split PDF — Extract Pages from PDF Free | Perotron Web",
             },
             {
                 name: "twitter:description",

@@ -1,6 +1,7 @@
 {
-  "name": "tools-naveen",
+  "name": "perotron-web",
   "private": true,
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",

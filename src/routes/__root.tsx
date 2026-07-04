@@ -20,9 +20,9 @@ import { buttonVariants } from "@/components/ui/button"
 import { Toaster } from "sonner"
 import { PostHogProvider } from "@posthog/react"
 
-const SITE_TITLE = "Naveen's Tools — Browser-based utilities, zero data sent"
+const SITE_TITLE = "Perotron Web — Privacy-first tools powered by WebAssembly"
 const SITE_DESCRIPTION =
-    "Free, open-source browser utilities by Naveen. Merge and split PDFs without uploading a single byte. Licensed under GNU GPLv3."
+    "Free, open-source privacy-first tools powered by WebAssembly. Merge PDFs, split PDFs, generate custom QR codes — all without uploading a single byte. Licensed under GNU AGPLv3."
 const SITE_URL = "https://tools.naveenmk.me"
 const SITE_IMAGE = "/banner.png"
 
@@ -88,7 +88,7 @@ export const Route = createRootRoute({
             },
             {
                 name: "apple-mobile-web-app-title",
-                content: "Naveen's Tools",
+                content: "Perotron Web",
             },
         ],
         links: [
@@ -157,14 +157,14 @@ const Logo = () => {
         <>
             <Image
                 src={logoLight}
-                alt="Naveen's Tools"
+                alt="Perotron Web"
                 width={40}
                 height={40}
                 className="block dark:hidden"
             />
             <Image
                 src={logoDark}
-                alt="Naveen's Tools"
+                alt="Perotron Web"
                 width={40}
                 height={40}
                 className="hidden dark:block"
@@ -202,7 +202,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                                 >
                                     <Logo />
                                     <span className="tracking-tight">
-                                        Naveen's Tools
+                                        Perotron Web
                                     </span>
                                 </Link>
 
@@ -256,12 +256,12 @@ gtag('config', 'G-F61KVD3XWG');`,
                             <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground md:flex-row md:px-6">
                                 <div className="flex items-center gap-2">
                                     <Logo />
-                                    <span>Naveen's Tools</span>
+                                    <span>Perotron Web</span>
                                     <Separator
                                         orientation="vertical"
                                         className="my-auto h-3.5"
                                     />
-                                    <span>Licensed under GNU GPLv3</span>
+                                    <span>Open source · GNU AGPLv3</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="flex size-1.5 shrink-0 rounded-full bg-green-500" />

@@ -21,34 +21,34 @@ export const Route = createFileRoute("/")({
     head: () => ({
         meta: [
             {
-                title: "Naveen's Tools — Free Browser-Based PDF Utilities",
+                title: "Perotron Web — Privacy-first Tools Powered by WebAssembly",
             },
             {
                 name: "description",
                 content:
-                    "Merge PDFs, split PDFs, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
+                    "Merge PDFs, split PDFs, generate QR codes, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
             },
             // Open Graph
             {
                 property: "og:title",
-                content: "Naveen's Tools — Free Browser-Based PDF Utilities",
+                content: "Perotron Web — Privacy-first Tools Powered by WebAssembly",
             },
             {
                 property: "og:description",
                 content:
-                    "Merge PDFs, split PDFs, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
+                    "Merge PDFs, split PDFs, generate QR codes, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
             },
             { property: "og:type", content: "website" },
             // Twitter
             { name: "twitter:card", content: "summary_large_image" },
             {
                 name: "twitter:title",
-                content: "Naveen's Tools — Free Browser-Based PDF Utilities",
+                content: "Perotron Web — Privacy-first Tools Powered by WebAssembly",
             },
             {
                 name: "twitter:description",
                 content:
-                    "Merge PDFs, split PDFs, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
+                    "Merge PDFs, split PDFs, generate QR codes, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever.",
             },
         ],
         links: [{ rel: "canonical", href: "https://tools.naveenmk.me/" }],
@@ -71,12 +71,12 @@ function HomePage() {
                     </Badge>
 
                     <h1 className="text-5xl leading-[1.1] font-bold tracking-tight text-foreground md:text-[4rem]">
-                        Naveen's Tools
+                        Perotron Web
                     </h1>
 
                     <p className="max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-                        A personal set of browser utilities. Pick a tool, do the
-                        work — your files never leave your device.
+                        Privacy-first tools powered by WebAssembly. Your files
+                        never leave your device.
                     </p>
 
                     {/* ── Trust strip — the signature element ── */}
@@ -97,7 +97,7 @@ function HomePage() {
                         <TrustPillar
                             icon={<Code2 className="size-4" />}
                             label="Open Source"
-                            detail="GNU GPLv3 licensed"
+                            detail="GNU AGPLv3 licensed"
                         />
                         <Separator
                             orientation="vertical"
