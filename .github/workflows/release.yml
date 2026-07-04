@@ -1,0 +1,101 @@
+name: Release — Build & Deploy to Production
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# Only one production release can run at a time
+concurrency:
+  group: "release"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    name: Build, Deploy & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # needed to create the GitHub Release
+      deployments: write   # needed for Cloudflare Pages deployment status
+
+    steps:
+      - name: Checkout repository (tagged commit)
+        uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (pyodide + vite)
+        env:
+          VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
+          VITE_POSTHOG_PROJECT_TOKEN: ${{ secrets.VITE_POSTHOG_PROJECT_TOKEN }}
+        run: just build
+
+      # Deploy the tagged build to the Cloudflare Pages *production* environment.
+      # Passing --branch=main tells Wrangler to promote this to production.
+      - name: Deploy to Cloudflare Pages (production)
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy --project-name=perotron-web --branch=production
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print production URL
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: echo "Production URL: $DEPLOYMENT_URL"
+
+      # Extract the changelog section for this release to use as release notes.
+      - name: Extract release notes from CHANGELOG.md
+        id: changelog
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          # Grab lines between the version header and the next header (or EOF)
+          notes=$(awk "/^## \[$version\]/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md)
+          # Write to a temp file to handle multi-line content safely
+          printf '%s' "$notes" > /tmp/release_notes.md
+          echo "Release notes extracted for v$version"
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const notes = fs.readFileSync('/tmp/release_notes.md', 'utf8').trim();
+            const tag = context.ref.replace('refs/tags/', '');
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Perotron Web ${tag}`,
+              body: notes || `See [CHANGELOG.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/${tag}/CHANGELOG.md) for details.`,
+              draft: false,
+              prerelease: false,
+            });
+            console.log(`GitHub Release created for ${tag}`);

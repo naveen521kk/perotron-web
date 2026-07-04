@@ -1,7 +1,6 @@
-name: Build & Deploy to Cloudflare Pages
+name: CI — Build & Preview
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,18 +8,18 @@ on:
     branches:
       - main
 
-# Allow one concurrent deployment
+# Allow one concurrent run per branch/PR
 concurrency:
-  group: "deploy"
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: true
 
-# Default to bash
 defaults:
   run:
     shell: bash
 
 jobs:
-  build-and-deploy:
-    name: Build & Deploy
+  build-and-preview:
+    name: Build & Deploy Preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -56,10 +55,22 @@ jobs:
           VITE_POSTHOG_PROJECT_TOKEN: ${{ secrets.VITE_POSTHOG_PROJECT_TOKEN }}
         run: just build
 
-      - name: Deploy to Cloudflare Pages
+      # Deploy every push/PR as a Cloudflare Pages *preview* deployment.
+      # Wrangler uses the current branch name to generate a preview URL.
+      # Production deployments are handled by release.yml on tagged releases.
+      - name: Deploy to Cloudflare Pages (preview)
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy --project-name=perotron-web
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print preview URL
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+        run: |
+          echo "Preview URL : $DEPLOYMENT_URL"
+          echo "Branch alias: $ALIAS_URL"
