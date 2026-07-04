@@ -1,10 +1,14 @@
 import io
 import zipfile
+from importlib.metadata import version, PackageNotFoundError
 from typing import List, Dict, Any
 
 from pypdf import PdfReader, PdfWriter
 
-__version__ = "0.1.0"
+try:
+    __version__ = version("pyodide-tools")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 _TOOL_NAME = f"Perotron Web {__version__}"
 

@@ -92,7 +92,7 @@ function getPyodide(): Promise<PyodideInterface> {
 
             const micropip = pyodide.pyimport("micropip")
             log("Installing pyodide_tools wheel…")
-            await micropip.install("/pyodide_tools-0.1.0-py3-none-any.whl")
+            await micropip.install(`/pyodide_tools-${__APP_VERSION__}-py3-none-any.whl`)
 
             const totalMs = performance.now() - t0
             log(
