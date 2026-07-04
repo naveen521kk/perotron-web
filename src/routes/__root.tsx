@@ -318,7 +318,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                                             GitHub
                                         </a>
                                         <a
-                                            href="https://github.com/naveen521kk/perotron-web/releases"
+                                            href="https://github.com/naveen521kk/perotron-web/blob/main/CHANGELOG.md"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="transition-colors hover:text-foreground"
