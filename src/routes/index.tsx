@@ -85,7 +85,7 @@ function HomePage() {
         <>
             <div className="flex w-full flex-1 flex-col items-center">
                 {/* ── Hero ─────────────────────────────────────────────── */}
-                <section className="mx-auto flex w-full max-w-4xl animate-in flex-col items-center gap-8 px-4 pt-24 pb-16 text-center duration-700 fade-in slide-in-from-bottom-6">
+                <section className="mx-auto flex w-full max-w-4xl animate-in flex-col items-center gap-8 px-4 pt-24 pb-16 text-center">
                     <div className="space-y-4">
                         <h1 className="text-5xl leading-[1.1] font-bold tracking-tight text-foreground md:text-[5rem] lg:text-[5.5rem]">
                             Perotron Web
