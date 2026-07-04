@@ -69,7 +69,8 @@ jobs:
       - name: Print production URL
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
-        run: echo "Production URL: $DEPLOYMENT_URL"
+        run: |
+          echo "Production URL: $DEPLOYMENT_URL"
 
       # Extract the changelog section for this release to use as release notes.
       - name: Extract release notes from CHANGELOG.md
