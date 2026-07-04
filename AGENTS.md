@@ -17,8 +17,11 @@ This document serves as a reference for agents and developers working on "Perotr
 ## General Code Structure
 - `src/routes/` - Contains the application routes managed by TanStack Router.
   - `__root.tsx`: The root layout containing shared UI like navigation bars and global providers.
-  - `index.tsx`: The landing page listing the available tools.
-  - `merge.tsx`, `split.tsx`: Dedicated pages for each PDF utility containing drag-and-drop file upload interfaces.
+  - `index.tsx`: The landing page listing all available tools.
+  - `pdf/index.tsx`: Category landing page listing PDF tools.
+  - `pdf/merge.tsx`, `pdf/split.tsx`: Dedicated pages for each PDF utility containing drag-and-drop file upload interfaces.
+  - `qr/index.tsx`: Category landing page listing QR tools.
+  - `qr/generator.tsx`: QR Code Generator page.
 - `src/components/ui/` - Contains the Shadcn UI component primitives (e.g., `button.tsx`, `card.tsx`, `badge.tsx`, `separator.tsx`). These are installed via the `shadcn` CLI and should not be modified manually unless necessary.
 - `src/lib/utils.ts` - Shared utility functions, typically including the `cn()` merge function for Tailwind classes.
 
@@ -44,9 +47,13 @@ When modifying or extending the UI, the following rules must be strictly adhered
   ```
 - The root domain is `https://tools.naveenmk.me`. Current canonical mappings:
   - `/` → `https://tools.naveenmk.me/`
-  - `/merge` → `https://tools.naveenmk.me/merge`
-  - `/split` → `https://tools.naveenmk.me/split`
+  - `/pdf` → `https://tools.naveenmk.me/pdf`
+  - `/pdf/merge` → `https://tools.naveenmk.me/pdf/merge`
+  - `/pdf/split` → `https://tools.naveenmk.me/pdf/split`
+  - `/qr` → `https://tools.naveenmk.me/qr`
+  - `/qr/generator` → `https://tools.naveenmk.me/qr/generator`
 - When adding a new route, always include its canonical URL following the same pattern.
+- When adding a new tool category, create a directory under `src/routes/` with an `index.tsx` for the category landing page.
 
 ## Package Management
 - Always use `pnpm` for installing dependencies.

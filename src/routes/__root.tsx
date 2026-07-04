@@ -1,9 +1,13 @@
+import { useEffect } from "react"
 import {
     HeadContent,
     Scripts,
     createRootRoute,
     Link,
+    Outlet,
+    useLocation,
 } from "@tanstack/react-router"
+import { usePostHog } from "@posthog/react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
@@ -19,6 +23,7 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Toaster } from "sonner"
 import { PostHogProvider } from "@posthog/react"
+import { DefaultCatchBoundary } from "@/components/default-catch-boundary"
 
 const SITE_TITLE = "Perotron Web — Privacy-first tools powered by WebAssembly"
 const SITE_DESCRIPTION =
@@ -137,7 +142,27 @@ export const Route = createRootRoute({
             },
         ],
     }),
-    notFoundComponent: () => (
+    notFoundComponent: NotFoundPage,
+    errorComponent: (props) => {
+        return (
+            <RootLayout>
+                <DefaultCatchBoundary {...props} />
+            </RootLayout>
+        )
+    },
+    component: RootComponent,
+})
+
+
+function NotFoundPage() {
+    const posthog = usePostHog()
+    const pathname = useLocation({ select: (l) => l.pathname })
+
+    useEffect(() => {
+        posthog?.capture('page_not_found', { path: pathname })
+    }, [pathname, posthog])
+
+    return (
         <main className="container mx-auto p-4 pt-16 text-center">
             <h1 className="mb-4 text-4xl font-bold">404</h1>
             <p className="text-muted-foreground">That page doesn't exist.</p>
@@ -148,9 +173,16 @@ export const Route = createRootRoute({
                 Back to tools
             </Link>
         </main>
-    ),
-    shellComponent: RootDocument,
-})
+    )
+}
+
+function RootComponent() {
+  return (
+    <RootLayout>
+      <Outlet />
+    </RootLayout>
+  )
+}
 
 const Logo = () => {
     return (
@@ -173,7 +205,7 @@ const Logo = () => {
     )
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
@@ -213,22 +245,16 @@ gtag('config', 'G-F61KVD3XWG');`,
 
                                 <nav className="hidden items-center gap-5 md:flex">
                                     <Link
-                                        to="/merge"
+                                        to="/pdf"
                                         className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
                                     >
-                                        Merge PDF
+                                        PDF Tools
                                     </Link>
                                     <Link
-                                        to="/split"
+                                        to="/qr"
                                         className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
                                     >
-                                        Split PDF
-                                    </Link>
-                                    <Link
-                                        to="/qr-generator"
-                                        className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
-                                    >
-                                        QR Generator
+                                        QR Tools
                                     </Link>
                                 </nav>
 
@@ -258,24 +284,90 @@ gtag('config', 'G-F61KVD3XWG');`,
 
                         <main className="flex flex-1 flex-col">{children}</main>
 
-                        <footer className="mt-auto border-t border-border">
-                            <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground md:flex-row md:px-6">
+                        <footer className="mt-auto border-t border-border bg-muted/40">
+                            <div className="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-2 md:px-6 lg:grid-cols-4">
+                                <div className="flex flex-col gap-4">
                                 <div className="flex items-center gap-2">
                                     <Logo />
-                                    <span>Perotron Web</span>
-                                    <Separator
-                                        orientation="vertical"
-                                        className="my-auto h-3.5"
-                                    />
-                                    <span>Open source · GNU AGPLv3</span>
+                                        <span className="font-semibold text-foreground">
+                                            Perotron Web
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        Compute locally. Work privately.
+                                    </p>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="flex size-1.5 shrink-0 rounded-full bg-green-500" />
-                                    <span>
-                                        All processing happens in your browser —
-                                        no data is ever sent to a server.
-                                    </span>
+                                <div className="flex flex-col gap-3">
+                                    <h4 className="font-medium text-foreground">
+                                        Project & Platform
+                                    </h4>
+                                    <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                                        <a
+                                            href="#tools"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            Tools
+                                        </a>
+                                        {/* <Link to="/" className="hover:text-foreground transition-colors">Documentation</Link> */}
+                                        <a
+                                            href="https://github.com/naveen521kk/perotron-web"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            GitHub
+                                        </a>
+                                        <a
+                                            href="https://github.com/naveen521kk/perotron-web/releases"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            Changelog
+                                        </a>
+                                    </nav>
                                 </div>
+                                <div className="flex flex-col gap-3">
+                                    <h4 className="font-medium text-foreground">
+                                        Legal
+                                    </h4>
+                                    <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                                        <Link
+                                            to="/privacy"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            Privacy Policy
+                                        </Link>
+                                        <Link
+                                            to="/terms"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            Terms of Use
+                                        </Link>
+                                        <a
+                                            href="https://github.com/naveen521kk/perotron-web/blob/main/LICENSE"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            License
+                                        </a>
+                                    </nav>
+                                </div>
+                            </div>
+                            <div className="container mx-auto border-t border-border/50 px-4 py-6 md:px-6">
+                                <p className="text-center text-xs text-muted-foreground">
+                                    &copy; {new Date().getFullYear()}{" "}
+                                    <a
+                                        href="https://www.naveenmk.me"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="transition-colors hover:text-foreground"
+                                    >
+                                        Naveen M K
+                                    </a>
+                                    . Licensed under GNU AGPLv3.
+                                </p>
                             </div>
                         </footer>
                         <Toaster richColors closeButton />

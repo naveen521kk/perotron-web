@@ -76,7 +76,7 @@ const FooterAdBanner = lazy(() =>
 
 /* ── Route ──────────────────────────────────────────────────────── */
 
-export const Route = createFileRoute("/qr-generator")({
+export const Route = createFileRoute("/qr/generator")({
     head: () => ({
         meta: [
             {
@@ -113,7 +113,7 @@ export const Route = createFileRoute("/qr-generator")({
         links: [
             {
                 rel: "canonical",
-                href: "https://tools.naveenmk.me/qr-generator",
+                href: "https://tools.naveenmk.me/qr/generator",
             },
         ],
     }),
