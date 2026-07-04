@@ -1,9 +1,5 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "tools",
-    "compatibility_date": "2026-06-20",
-    "assets": {
-        "directory": "./dist/client",
-        "not_found_handling": "single-page-application",
-    },
+    "name": "perotron-web",
+    "pages_build_output_dir": "./dist/client"
 }
