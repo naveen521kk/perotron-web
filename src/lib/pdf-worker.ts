@@ -1,4 +1,4 @@
-import { loadPyodide, type PyodideInterface } from "pyodide"
+import { loadPyodide, type PyodideInterface, version } from "pyodide"
 
 type MergeMessage = {
     type: "merge"
@@ -78,7 +78,7 @@ function getPyodide(): Promise<PyodideInterface> {
             const t0 = performance.now()
 
             const pyodide = await loadPyodide({
-                indexURL: "https://cdn.jsdelivr.net/pyodide/v314.0.1/full/",
+                indexURL: `https://cdn.jsdelivr.net/pyodide/v${version}/full/`,
             })
             log(
                 "Pyodide runtime loaded in",
