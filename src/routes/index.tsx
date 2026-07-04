@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { FileStack, Scissors, ShieldCheck, Code2 } from "lucide-react"
+import { FileStack, Scissors, ShieldCheck, Code2, QrCode } from "lucide-react"
 import { SiGithub } from "@icons-pack/react-simple-icons"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -110,8 +110,8 @@ function HomePage() {
                         <TrustPillar
                             icon={<SiGithub className="size-4" />}
                             label="View the code"
-                            detail="github.com/naveen521kk/tools"
-                            href="https://github.com/naveen521kk/tools"
+                            detail="github.com/naveen521kk/perotron-web"
+                            href="https://github.com/naveen521kk/perotron-web"
                         />
                     </div>
                 </section>
@@ -133,6 +133,12 @@ function HomePage() {
                             icon={<Scissors className="size-6" />}
                             title="Split PDF"
                             description="Extract individual pages or split a large PDF into separate files, all without uploading anything."
+                        />
+                        <ToolCard
+                            to="/qr-generator"
+                            icon={<QrCode className="size-6" />}
+                            title="QR Code Generator"
+                            description="Create custom QR codes with your own colors, styles, and logos. Support for URLs, WiFi, vCards, WhatsApp, and more."
                         />
                     </div>
                     <p className="mt-6 text-center text-xs text-muted-foreground">

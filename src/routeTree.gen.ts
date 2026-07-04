@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplitRouteImport } from './routes/split'
+import { Route as QrGeneratorRouteImport } from './routes/qr-generator'
 import { Route as MergeRouteImport } from './routes/merge'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SplitRoute = SplitRouteImport.update({
   id: '/split',
   path: '/split',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrGeneratorRoute = QrGeneratorRouteImport.update({
+  id: '/qr-generator',
+  path: '/qr-generator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MergeRoute = MergeRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/merge': typeof MergeRoute
+  '/qr-generator': typeof QrGeneratorRoute
   '/split': typeof SplitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/merge': typeof MergeRoute
+  '/qr-generator': typeof QrGeneratorRoute
   '/split': typeof SplitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/merge': typeof MergeRoute
+  '/qr-generator': typeof QrGeneratorRoute
   '/split': typeof SplitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/merge' | '/split'
+  fullPaths: '/' | '/merge' | '/qr-generator' | '/split'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/merge' | '/split'
-  id: '__root__' | '/' | '/merge' | '/split'
+  to: '/' | '/merge' | '/qr-generator' | '/split'
+  id: '__root__' | '/' | '/merge' | '/qr-generator' | '/split'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MergeRoute: typeof MergeRoute
+  QrGeneratorRoute: typeof QrGeneratorRoute
   SplitRoute: typeof SplitRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/split'
       fullPath: '/split'
       preLoaderRoute: typeof SplitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-generator': {
+      id: '/qr-generator'
+      path: '/qr-generator'
+      fullPath: '/qr-generator'
+      preLoaderRoute: typeof QrGeneratorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/merge': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MergeRoute: MergeRoute,
+  QrGeneratorRoute: QrGeneratorRoute,
   SplitRoute: SplitRoute,
 }
 export const routeTree = rootRouteImport
