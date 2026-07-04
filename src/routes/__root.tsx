@@ -224,6 +224,12 @@ gtag('config', 'G-F61KVD3XWG');`,
                                     >
                                         Split PDF
                                     </Link>
+                                    <Link
+                                        to="/qr-generator"
+                                        className="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
+                                    >
+                                        QR Generator
+                                    </Link>
                                 </nav>
 
                                 <div className="ml-auto flex items-center gap-2">
