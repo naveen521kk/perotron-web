@@ -229,7 +229,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                                 <div className="ml-auto flex items-center gap-2">
                                     <ModeToggle />
                                     <a
-                                        href="https://github.com/naveen521kk/tools"
+                                        href="https://github.com/naveen521kk/perotron-web"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={cn(
