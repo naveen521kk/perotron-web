@@ -1,11 +1,13 @@
 # Agent Learnings & Project Structure
 
-This document serves as a reference for agents and developers working on "Naveen's Tools". It outlines the core tech stack, the established code structure, and the critical design patterns to follow.
+This document serves as a reference for agents and developers working on "Perotron Web". It outlines the core tech stack, the established code structure, and the critical design patterns to follow.
 
 ## Project Context
-- **Name:** Naveen's Tools - PDF Utilities
-- **Goal:** Provide browser-based PDF utilities (like Merge and Split) where files never leave the user's device. Processing is intended to happen entirely client-side (with PyOdide/WASM planned for the future).
-- **Project Idea / Vision:** The platform is a Single Page Application (SPA) built with TanStack Router and Shadcn UI, designed to host various web tools. The initial focus is on browser-based PDF utilities (Merging, Splitting). The UI takes strong inspiration from iLovePDF, featuring a prominent, single large button/dropzone to upload or drag-and-drop PDF files. A basic homepage introduces the available tools and links to them. Future development will integrate PyOdide to run Python libraries like `pypdf` directly in the browser, ensuring all document operations remain client-side.
+- **Name:** Perotron Web
+- **Goal:** A privacy-first, open-source tools platform where all data processing happens locally in the browser — no server, nothing uploaded. Built for the long term to host many different tools needed by people.
+- **License:** GNU AGPL v3 (fully open source)
+- **Tagline:** "Privacy-first tools powered by WebAssembly."
+- **Project Idea / Vision:** The platform is a Single Page Application (SPA) built with TanStack Router and Shadcn UI, designed to host a wide variety of browser-based web tools. The initial focus is on PDF utilities (Merging, Splitting) and a QR Code Generator. Future development will expand to many more tools. All processing runs client-side via WebAssembly (PyOdide/WASM), ensuring user data never leaves the device.
 - **Tech Stack:** 
   - React + Vite
   - TanStack Router (File-based routing)

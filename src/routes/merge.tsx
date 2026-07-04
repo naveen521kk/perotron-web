@@ -64,7 +64,7 @@ export const Route = createFileRoute("/merge")({
     head: () => ({
         meta: [
             {
-                title: "Merge PDF — Combine PDFs Free Online | Naveen's Tools",
+                title: "Merge PDF — Combine PDFs Free Online | Perotron Web",
             },
             {
                 name: "description",
@@ -74,7 +74,7 @@ export const Route = createFileRoute("/merge")({
             {
                 property: "og:title",
                 content:
-                    "Merge PDF — Combine PDFs Free Online | Naveen's Tools",
+                    "Merge PDF — Combine PDFs Free Online | Perotron Web",
             },
             {
                 property: "og:description",
@@ -86,7 +86,7 @@ export const Route = createFileRoute("/merge")({
             {
                 name: "twitter:title",
                 content:
-                    "Merge PDF — Combine PDFs Free Online | Naveen's Tools",
+                    "Merge PDF — Combine PDFs Free Online | Perotron Web",
             },
             {
                 name: "twitter:description",

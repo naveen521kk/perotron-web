@@ -66,6 +66,6 @@ The built wheel (`.whl`) is placed in the `dist/` directory and should be copied
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html).
+This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html).
 
 Copyright © 2026 Naveen M K
