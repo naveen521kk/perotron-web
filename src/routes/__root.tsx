@@ -1,9 +1,13 @@
+import { useEffect } from "react"
 import {
     HeadContent,
     Scripts,
     createRootRoute,
     Link,
+    Outlet,
+    useLocation,
 } from "@tanstack/react-router"
+import { usePostHog } from "@posthog/react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
@@ -19,6 +23,7 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Toaster } from "sonner"
 import { PostHogProvider } from "@posthog/react"
+import { DefaultCatchBoundary } from "@/components/default-catch-boundary"
 
 const SITE_TITLE = "Perotron Web — Privacy-first tools powered by WebAssembly"
 const SITE_DESCRIPTION =
@@ -137,7 +142,27 @@ export const Route = createRootRoute({
             },
         ],
     }),
-    notFoundComponent: () => (
+    notFoundComponent: NotFoundPage,
+    errorComponent: (props) => {
+        return (
+            <RootLayout>
+                <DefaultCatchBoundary {...props} />
+            </RootLayout>
+        )
+    },
+    component: RootComponent,
+})
+
+
+function NotFoundPage() {
+    const posthog = usePostHog()
+    const pathname = useLocation({ select: (l) => l.pathname })
+
+    useEffect(() => {
+        posthog?.capture('page_not_found', { path: pathname })
+    }, [pathname, posthog])
+
+    return (
         <main className="container mx-auto p-4 pt-16 text-center">
             <h1 className="mb-4 text-4xl font-bold">404</h1>
             <p className="text-muted-foreground">That page doesn't exist.</p>
@@ -148,9 +173,16 @@ export const Route = createRootRoute({
                 Back to tools
             </Link>
         </main>
-    ),
-    shellComponent: RootDocument,
-})
+    )
+}
+
+function RootComponent() {
+  return (
+    <RootLayout>
+      <Outlet />
+    </RootLayout>
+  )
+}
 
 const Logo = () => {
     return (
@@ -173,7 +205,7 @@ const Logo = () => {
     )
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
