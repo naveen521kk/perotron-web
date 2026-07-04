@@ -318,7 +318,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                                             GitHub
                                         </a>
                                         <a
-                                            href="https://github.com/naveen521kk/perotron-web/releases"
+                                            href="https://github.com/naveen521kk/perotron-web/blob/main/CHANGELOG.md"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="transition-colors hover:text-foreground"
@@ -356,7 +356,8 @@ gtag('config', 'G-F61KVD3XWG');`,
                                 </div>
                             </div>
                             <div className="container mx-auto border-t border-border/50 px-4 py-6 md:px-6">
-                                <p className="text-center text-xs text-muted-foreground">
+                                <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+                                    <p className="text-xs text-muted-foreground">
                                     &copy; {new Date().getFullYear()}{" "}
                                     <a
                                         href="https://www.naveenmk.me"
@@ -368,6 +369,16 @@ gtag('config', 'G-F61KVD3XWG');`,
                                     </a>
                                     . Licensed under GNU AGPLv3.
                                 </p>
+                                    <a
+                                        href="https://github.com/naveen521kk/perotron-web/releases"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-mono text-xs text-muted-foreground/60 transition-colors hover:text-muted-foreground"
+                                        aria-label={`Version ${__APP_VERSION__} — view changelog`}
+                                    >
+                                        v{__APP_VERSION__}
+                                    </a>
+                                </div>
                             </div>
                         </footer>
                         <Toaster richColors closeButton />

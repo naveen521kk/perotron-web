@@ -1,7 +1,7 @@
 [project]
 name = "pyodide-tools"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.0.0"
+description = "Pyodide-based PDF processing tools for Perotron Web"
 readme = "README.md"
 authors = [
     { name = "Naveen M K", email = "naveen521kk@gmail.com" }
