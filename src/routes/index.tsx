@@ -110,7 +110,7 @@ function HomePage() {
                         <TrustPillar
                             icon={<SiGithub className="size-4" />}
                             label="View the code"
-                            detail="github.com/naveen521kk/perotron-web"
+                            detail="naveen521kk/perotron-web"
                             href="https://github.com/naveen521kk/perotron-web"
                         />
                     </div>
