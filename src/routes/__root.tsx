@@ -300,12 +300,18 @@ gtag('config', 'G-F61KVD3XWG');`,
                                         Legal
                                     </h4>
                                     <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
-                                        {/* <Link
+                                        <Link
                                             to="/privacy"
                                             className="transition-colors hover:text-foreground"
                                         >
-                                            Privacy
-                                        </Link> */}
+                                            Privacy Policy
+                                        </Link>
+                                        <Link
+                                            to="/terms"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            Terms of Use
+                                        </Link>
                                         <a
                                             href="https://github.com/naveen521kk/perotron-web/blob/main/LICENSE"
                                             target="_blank"

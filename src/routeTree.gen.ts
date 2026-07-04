@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QrIndexRouteImport } from './routes/qr/index'
 import { Route as PdfIndexRouteImport } from './routes/pdf/index'
@@ -16,6 +18,16 @@ import { Route as QrGeneratorRouteImport } from './routes/qr/generator'
 import { Route as PdfSplitRouteImport } from './routes/pdf/split'
 import { Route as PdfMergeRouteImport } from './routes/pdf/merge'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +61,8 @@ const PdfMergeRoute = PdfMergeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/pdf/merge': typeof PdfMergeRoute
   '/pdf/split': typeof PdfSplitRoute
   '/qr/generator': typeof QrGeneratorRoute
@@ -57,6 +71,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/pdf/merge': typeof PdfMergeRoute
   '/pdf/split': typeof PdfSplitRoute
   '/qr/generator': typeof QrGeneratorRoute
@@ -66,6 +82,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/pdf/merge': typeof PdfMergeRoute
   '/pdf/split': typeof PdfSplitRoute
   '/qr/generator': typeof QrGeneratorRoute
@@ -76,16 +94,28 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/privacy'
+    | '/terms'
     | '/pdf/merge'
     | '/pdf/split'
     | '/qr/generator'
     | '/pdf/'
     | '/qr/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pdf/merge' | '/pdf/split' | '/qr/generator' | '/pdf' | '/qr'
+  to:
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/pdf/merge'
+    | '/pdf/split'
+    | '/qr/generator'
+    | '/pdf'
+    | '/qr'
   id:
     | '__root__'
     | '/'
+    | '/privacy'
+    | '/terms'
     | '/pdf/merge'
     | '/pdf/split'
     | '/qr/generator'
@@ -95,6 +125,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   PdfMergeRoute: typeof PdfMergeRoute
   PdfSplitRoute: typeof PdfSplitRoute
   QrGeneratorRoute: typeof QrGeneratorRoute
@@ -104,6 +136,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -151,6 +197,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   PdfMergeRoute: PdfMergeRoute,
   PdfSplitRoute: PdfSplitRoute,
   QrGeneratorRoute: QrGeneratorRoute,
