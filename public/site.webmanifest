@@ -1,7 +1,20 @@
 {
   "name": "Perotron Web",
   "short_name": "Perotron",
+  "description": "Privacy-first tools powered by WebAssembly. Merge PDFs, split PDFs, generate custom QR codes — all without uploading a single byte.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
+  "categories": ["utilities", "productivity"],
   "icons": [
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
     {
       "src": "/web-app-manifest-192x192.png?v=1",
       "sizes": "192x192",
@@ -9,13 +22,22 @@
       "purpose": "maskable"
     },
     {
+      "src": "/web-app-manifest-192x192.png?v=1",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/web-app-manifest-512x512.png?v=1",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png?v=1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

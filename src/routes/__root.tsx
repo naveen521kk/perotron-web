@@ -24,6 +24,8 @@ import { buttonVariants } from "@/components/ui/button"
 import { Toaster } from "sonner"
 import { PostHogProvider } from "@posthog/react"
 import { DefaultCatchBoundary } from "@/components/default-catch-boundary"
+import { OfflineIndicator } from "@/components/offline-indicator"
+import { registerSW } from "@/lib/register-sw"
 
 const SITE_TITLE = "Perotron Web — Privacy-first tools powered by WebAssembly"
 const SITE_DESCRIPTION =
@@ -36,6 +38,8 @@ const posthogOptions = {
     ui_host: "https://us.posthog.com",
     defaults: "2026-05-30",
     capture_exceptions: true,
+    opt_out_capturing_by_default: import.meta.env.DEV,
+    disable_persistence: import.meta.env.DEV,
 } as const
 
 export const Route = createRootRoute({
@@ -127,20 +131,26 @@ export const Route = createRootRoute({
                 rel: "manifest",
                 href: "/site.webmanifest",
             },
-        ],
-        scripts: [
-            // https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG
             {
-                async: true,
-                src: "https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG",
-            },
-            // Google AdSense
-            {
-                async: true,
-                src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7183740147103241",
-                crossOrigin: "anonymous",
+                rel: "canonical",
+                href: "https://tools.naveenmk.me/",
             },
         ],
+        scripts: import.meta.env.PROD
+            ? [
+                  // https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG
+                  {
+                      async: true,
+                      src: "https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG",
+                  },
+                  // Google AdSense
+                  {
+                      async: true,
+                      src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7183740147103241",
+                      crossOrigin: "anonymous",
+                  },
+              ]
+            : [],
     }),
     notFoundComponent: NotFoundPage,
     errorComponent: (props) => {
@@ -206,19 +216,27 @@ const Logo = () => {
 }
 
 function RootLayout({ children }: { children: React.ReactNode }) {
+    useEffect(() => {
+        if (import.meta.env.PROD) {
+            registerSW()
+        }
+    }, [])
+
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
                 <HeadContent />
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: `
+                {import.meta.env.PROD && (
+                    <script
+                        dangerouslySetInnerHTML={{
+                            __html: `
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-F61KVD3XWG');`,
-                    }}
-                />
+                        }}
+                    />
+                )}
             </head>
             <body className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20 google-anno-skip">
                 <PostHogProvider
@@ -287,8 +305,8 @@ gtag('config', 'G-F61KVD3XWG');`,
                         <footer className="mt-auto border-t border-border bg-muted/40">
                             <div className="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-2 md:px-6 lg:grid-cols-4">
                                 <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-2">
-                                    <Logo />
+                                    <div className="flex items-center gap-2">
+                                        <Logo />
                                         <span className="font-semibold text-foreground">
                                             Perotron Web
                                         </span>
@@ -358,17 +376,17 @@ gtag('config', 'G-F61KVD3XWG');`,
                             <div className="container mx-auto border-t border-border/50 px-4 py-6 md:px-6">
                                 <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
                                     <p className="text-xs text-muted-foreground">
-                                    &copy; {new Date().getFullYear()}{" "}
-                                    <a
-                                        href="https://www.naveenmk.me"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="transition-colors hover:text-foreground"
-                                    >
-                                        Naveen M K
-                                    </a>
-                                    . Licensed under GNU AGPLv3.
-                                </p>
+                                        &copy; {new Date().getFullYear()}{" "}
+                                        <a
+                                            href="https://www.naveenmk.me"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="transition-colors hover:text-foreground"
+                                        >
+                                            Naveen M K
+                                        </a>
+                                        . Licensed under GNU AGPLv3.
+                                    </p>
                                     <a
                                         href="https://github.com/naveen521kk/perotron-web/releases"
                                         target="_blank"
@@ -382,6 +400,7 @@ gtag('config', 'G-F61KVD3XWG');`,
                             </div>
                         </footer>
                         <Toaster richColors closeButton />
+                        <OfflineIndicator />
                     </ThemeProvider>
 
                     <TanStackDevtools

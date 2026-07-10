@@ -40,6 +40,11 @@ type GetInfoMessage = {
     buffer: ArrayBufferLike
 }
 
+type WarmUpMessage = {
+    type: "warm-up"
+    id: number
+}
+
 type WorkerMessage =
     | MergeMessage
     | SplitFixedMessage
@@ -47,6 +52,7 @@ type WorkerMessage =
     | SplitPagesMessage
     | SplitSizeMessage
     | GetInfoMessage
+    | WarmUpMessage
 
 type AnalyticsParams = Record<string, string | number | boolean>
 
@@ -57,6 +63,7 @@ type WorkerResponse =
     | { type: "error"; id: number; message: string }
     | { type: "status"; id: number; message: string }
     | { type: "analytics"; event: string; params: AnalyticsParams }
+    | { type: "warm-up-done"; id: number }
 
 // Helpers
 const log = (...args: unknown[]) => console.log("[pdf-worker]", ...args)
@@ -391,6 +398,20 @@ split_pdf_by_size(bytes(pdf_buffer), max_size_bytes)
     self.postMessage(response, { transfer: [resultBuffer] })
 }
 
+/* ── Warm-up handler ─────────────────────────────────────────────── */
+
+async function handleWarmUp(id: number) {
+    log(`[warm-up:${id}] Pre-caching pypdf wheel…`)
+    const pyodide = await getPyodide()
+
+    // Import pypdf to trigger micropip to fetch and cache the wheel
+    await pyodide.runPythonAsync(`import pypdf`)
+    log(`[warm-up:${id}] pypdf imported — wheel is now cached`)
+
+    const response: WorkerResponse = { type: "warm-up-done", id }
+    self.postMessage(response)
+}
+
 /* ── Message router ──────────────────────────────────────────────── */
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
@@ -431,6 +452,9 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
                     (event.data as SplitSizeMessage).buffer,
                     (event.data as SplitSizeMessage).maxSizeBytes
                 )
+                break
+            case "warm-up":
+                await handleWarmUp(id)
                 break
             default:
                 warn("Received unknown message type:", type)
