@@ -1,5 +1,5 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "perotron-web",
-    "pages_build_output_dir": "./dist/client"
+    "pages_build_output_dir": "./dist"
 }
