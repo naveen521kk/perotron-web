@@ -97,9 +97,6 @@
   </g>
   <style
      id="style10">
-        path { stroke: rgb(0%,0%,0%); }
-        @media (prefers-color-scheme: dark) {
         path { stroke: rgb(100%,100%,100%); }
-        }
     </style>
 </svg>
