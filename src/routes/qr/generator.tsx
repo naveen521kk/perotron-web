@@ -330,7 +330,7 @@ function ContentSection() {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" data-testid="content-type-tabs">
                 {CONTENT_TABS.filter((tab) =>
                     visibleButtons.includes(tab.value)
                 ).map((tab) => {
@@ -342,6 +342,8 @@ function ContentSection() {
                             size="sm"
                             className="flex items-center gap-1.5 h-9"
                             onClick={() => setContentType(tab.value)}
+                            data-testid={`content-tab-${tab.value}`}
+                            data-active={isActive ? "true" : "false"}
                         >
                             {tab.icon}
                             <span>{tab.label}</span>
@@ -355,6 +357,7 @@ function ContentSection() {
                             variant={isActiveInDropdown ? "default" : "outline"}
                             size="sm"
                             className="flex items-center gap-1.5 h-9"
+                            data-testid="content-tab-more"
                         >
                             {isActiveInDropdown && activeDropdownTab ? (
                                 <>
@@ -373,6 +376,7 @@ function ContentSection() {
                                 key={tab.value}
                                 onClick={() => setContentType(tab.value)}
                                 className="flex items-center gap-2 cursor-pointer"
+                                data-testid={`content-tab-${tab.value}`}
                             >
                                 {tab.icon}
                                 <span>{tab.label}</span>
@@ -382,7 +386,7 @@ function ContentSection() {
                 </DropdownMenu>
             </div>
 
-            <div className="mt-2">
+            <div className="mt-2" data-testid="content-form">
                 {contentType === "url" && <UrlForm />}
                 {contentType === "text" && <TextForm />}
                 {contentType === "vcard" && <VCardForm />}
@@ -657,12 +661,14 @@ function StyleSection() {
                         if (v) setStyle({ dotType: v as DotType })
                     }}
                     className="flex flex-wrap"
+                    data-testid="dot-type-toggle"
                 >
                     {DOT_TYPES.map((dt) => (
                         <ToggleGroupItem
                             key={dt.value}
                             value={dt.value}
                             className="text-xs"
+                            data-testid={`dot-type-${dt.value}`}
                         >
                             {dt.label}
                         </ToggleGroupItem>
@@ -675,6 +681,7 @@ function StyleSection() {
                 label="Dot Color"
                 value={style.dotColor}
                 onChange={(c) => setStyle({ dotColor: c })}
+                testId="dot-color"
             />
 
             <Separator />
@@ -695,12 +702,14 @@ function StyleSection() {
                             })
                     }}
                     className="flex flex-wrap"
+                    data-testid="corner-square-toggle"
                 >
                     {CORNER_SQUARE_TYPES.map((ct) => (
                         <ToggleGroupItem
                             key={ct.value}
                             value={ct.value}
                             className="text-xs"
+                            data-testid={`corner-square-${ct.value}`}
                         >
                             {ct.label}
                         </ToggleGroupItem>
@@ -712,6 +721,7 @@ function StyleSection() {
                 label="Corner Square Color"
                 value={style.cornerSquareColor}
                 onChange={(c) => setStyle({ cornerSquareColor: c })}
+                testId="corner-square-color"
             />
 
             <Separator />
@@ -730,12 +740,14 @@ function StyleSection() {
                             setStyle({ cornerDotType: v as CornerDotType })
                     }}
                     className="flex flex-wrap"
+                    data-testid="corner-dot-toggle"
                 >
                     {CORNER_DOT_TYPES.map((cd) => (
                         <ToggleGroupItem
                             key={cd.value}
                             value={cd.value}
                             className="text-xs"
+                            data-testid={`corner-dot-${cd.value}`}
                         >
                             {cd.label}
                         </ToggleGroupItem>
@@ -747,6 +759,7 @@ function StyleSection() {
                 label="Corner Dot Color"
                 value={style.cornerDotColor}
                 onChange={(c) => setStyle({ cornerDotColor: c })}
+                testId="corner-dot-color"
             />
 
             <Separator />
@@ -756,6 +769,7 @@ function StyleSection() {
                 label="Background"
                 value={style.backgroundColor}
                 onChange={(c) => setStyle({ backgroundColor: c })}
+                testId="background-color"
             />
         </div>
     )
@@ -824,6 +838,7 @@ function LogoSection() {
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
                         className="gap-1.5"
+                        data-testid="logo-upload-btn"
                     >
                         <Upload className="size-3.5" />
                         Upload
@@ -834,6 +849,7 @@ function LogoSection() {
                             size="sm"
                             onClick={removeLogo}
                             className="gap-1.5 text-destructive hover:text-destructive"
+                            data-testid="logo-remove-btn"
                         >
                             <X className="size-3.5" />
                             Remove
@@ -846,6 +862,7 @@ function LogoSection() {
                     accept="image/*"
                     className="hidden"
                     onChange={handleFileUpload}
+                    data-testid="logo-file-input"
                 />
             </div>
 
@@ -854,7 +871,7 @@ function LogoSection() {
                 <Label className="text-xs text-muted-foreground">
                     Or pick an example
                 </Label>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-6 gap-2" data-testid="example-logos">
                     {EXAMPLE_LOGOS.map((ex) => (
                         <TooltipProvider key={ex.name}>
                             <Tooltip>
@@ -869,6 +886,8 @@ function LogoSection() {
                                                 ? "border-primary bg-primary/10"
                                                 : "border-border"
                                         }`}
+                                        data-testid={`logo-example-${ex.name.toLowerCase()}`}
+                                        data-selected={logo.logoSrc === ex.src ? "true" : "false"}
                                     >
                                         <img
                                             src={ex.src}
@@ -892,7 +911,7 @@ function LogoSection() {
                             <Label className="text-xs text-muted-foreground">
                                 Logo Size
                             </Label>
-                            <span className="text-xs tabular-nums text-muted-foreground">
+                            <span className="text-xs tabular-nums text-muted-foreground" data-testid="logo-size-value">
                                 {Math.round(logo.logoSize * 100)}%
                             </span>
                         </div>
@@ -904,6 +923,7 @@ function LogoSection() {
                             onValueChange={([v]) =>
                                 setLogo({ logoSize: v / 100 })
                             }
+                            data-testid="logo-size-slider"
                         />
                     </div>
                     <div className="flex flex-col gap-2">
@@ -911,7 +931,7 @@ function LogoSection() {
                             <Label className="text-xs text-muted-foreground">
                                 Logo Margin
                             </Label>
-                            <span className="text-xs tabular-nums text-muted-foreground">
+                            <span className="text-xs tabular-nums text-muted-foreground" data-testid="logo-margin-value">
                                 {logo.logoMargin}px
                             </span>
                         </div>
@@ -923,6 +943,7 @@ function LogoSection() {
                             onValueChange={([v]) =>
                                 setLogo({ logoMargin: v })
                             }
+                            data-testid="logo-margin-slider"
                         />
                     </div>
                 </>
@@ -965,6 +986,7 @@ function AdvancedSection() {
                         })
                     }
                     className="flex flex-col gap-2"
+                    data-testid="error-correction-group"
                 >
                     {(
                         Object.entries(ERROR_CORRECTION_INFO) as [
@@ -976,6 +998,7 @@ function AdvancedSection() {
                             key={key}
                             htmlFor={`ec-${key}`}
                             className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 transition-colors has-[:checked]:border-primary/40 has-[:checked]:bg-primary/5 hover:bg-muted"
+                            data-testid={`ec-label-${key}`}
                         >
                             <RadioGroupItem
                                 value={key}
@@ -1003,7 +1026,7 @@ function AdvancedSection() {
                     <Label className="text-xs text-muted-foreground">
                         QR Code Size
                     </Label>
-                    <span className="text-xs tabular-nums text-muted-foreground">
+                    <span className="text-xs tabular-nums text-muted-foreground" data-testid="qr-size-value">
                         {advanced.size}px
                     </span>
                 </div>
@@ -1013,6 +1036,7 @@ function AdvancedSection() {
                     step={50}
                     value={[advanced.size]}
                     onValueChange={([v]) => setAdvanced({ size: v })}
+                    data-testid="qr-size-slider"
                 />
             </div>
 
@@ -1022,7 +1046,7 @@ function AdvancedSection() {
                     <Label className="text-xs text-muted-foreground">
                         Quiet Zone (Margin)
                     </Label>
-                    <span className="text-xs tabular-nums text-muted-foreground">
+                    <span className="text-xs tabular-nums text-muted-foreground" data-testid="qr-margin-value">
                         {advanced.margin}px
                     </span>
                 </div>
@@ -1032,6 +1056,7 @@ function AdvancedSection() {
                     step={5}
                     value={[advanced.margin]}
                     onValueChange={([v]) => setAdvanced({ margin: v })}
+                    data-testid="qr-margin-slider"
                 />
             </div>
         </div>
@@ -1116,15 +1141,16 @@ function PreviewPanel() {
     )
 
     return (
-        <div className="flex w-full flex-col items-center gap-6">
+        <div className="flex w-full flex-col items-center gap-6" data-testid="preview-panel">
             {/* Preview card */}
             <Card className="flex w-full items-center justify-center overflow-hidden p-8">
                 <div
                     ref={qrRef}
                     className="flex items-center justify-center [&>canvas]:max-w-full [&>canvas]:h-auto"
+                    data-testid="qr-canvas-container"
                 />
                 {!isReady && (
-                    <div className="flex size-64 items-center justify-center text-muted-foreground">
+                    <div className="flex size-64 items-center justify-center text-muted-foreground" data-testid="qr-loading-placeholder">
                         <QrCode className="size-16 animate-pulse opacity-30" />
                     </div>
                 )}
@@ -1138,16 +1164,16 @@ function PreviewPanel() {
                 <div className="flex flex-wrap gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className="w-full gap-2">
+                            <Button className="w-full gap-2" data-testid="download-image-btn">
                                 <Download className="size-4" />
                                 Download as Image
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
-                            <DropdownMenuItem onClick={() => handleDownload("png")}>
+                            <DropdownMenuItem onClick={() => handleDownload("png")} data-testid="download-png">
                                 PNG
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDownload("jpeg")}>
+                            <DropdownMenuItem onClick={() => handleDownload("jpeg")} data-testid="download-jpeg">
                                 JPEG
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -1156,6 +1182,7 @@ function PreviewPanel() {
                         variant="outline"
                         onClick={() => handleDownload("svg")}
                         className="w-full gap-2"
+                        data-testid="download-svg-btn"
                     >
                         <Download className="size-4" />
                         SVG
@@ -1164,7 +1191,7 @@ function PreviewPanel() {
             </div>
 
             {/* Info badge */}
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3" data-testid="privacy-badge">
                 <Badge variant="secondary" className="text-xs">
                     Client-side
                 </Badge>
@@ -1182,19 +1209,22 @@ function ColorPickerField({
     label,
     value,
     onChange,
+    testId,
 }: {
     label: string
     value: string
     onChange: (color: string) => void
+    testId?: string
 }) {
     return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" data-testid={testId ? `color-field-${testId}` : undefined}>
             <div className="relative">
                 <input
                     type="color"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     className="size-8 cursor-pointer appearance-none rounded-md border border-border bg-transparent p-0.5"
+                    data-testid={testId ? `color-picker-${testId}` : undefined}
                 />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -1206,6 +1236,7 @@ function ColorPickerField({
                     onChange={(e) => onChange(e.target.value)}
                     className="h-7 w-24 font-mono text-xs uppercase"
                     maxLength={7}
+                    data-testid={testId ? `color-input-${testId}` : undefined}
                 />
             </div>
         </div>
