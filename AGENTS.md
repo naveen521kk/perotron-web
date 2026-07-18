@@ -58,3 +58,15 @@ When modifying or extending the UI, the following rules must be strictly adhered
 ## Package Management
 - Always use `pnpm` for installing dependencies.
 - Use `pnpm dlx shadcn@latest add <component>` to add new UI components to the project.
+
+## E2E Testing Guidelines
+E2E tests are written using **Playwright** and live in the `e2e/` directory at the project root.
+
+- **Mandatory coverage:** Every new feature, tool, or route addition **must** be accompanied by corresponding E2E tests. This is non-negotiable.
+- **File naming:** Name test files after the feature/route they cover (e.g., `pdf-merge.spec.ts`, `qr-generator.spec.ts`).
+- **Test structure:** Group tests using `test.describe` blocks — at minimum, separate `Page load`, `Valid scenarios`, and `Invalid / Error scenarios` groups.
+- **Helpers:** Shared navigation helpers and fixture paths live in `e2e/helpers/`. Add reusable helpers there instead of duplicating logic across spec files.
+- **Fixtures:** Test fixture files (sample PDFs, images, etc.) live in `e2e/fixtures/`. Add any new fixture files needed for tests there.
+- **`data-testid` attributes:** When a test needs to target a specific UI element, add a `data-testid` attribute to the component in the source code rather than relying on fragile CSS selectors or text matching alone.
+- **Timeouts:** WASM/PyOdide operations can be slow. Set `test.setTimeout(120_000)` on any test that waits for file processing to complete, and use `{ timeout: 60_000 }` on the relevant `expect` assertions.
+- **Running tests:** Use `pnpm run e2e` for headless runs or `pnpm run e2e:ui` for the interactive Playwright UI.

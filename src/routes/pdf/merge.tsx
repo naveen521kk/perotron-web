@@ -73,8 +73,7 @@ export const Route = createFileRoute("/pdf/merge")({
             },
             {
                 property: "og:title",
-                content:
-                    "Merge PDF — Combine PDFs Free Online | Perotron Web",
+                content: "Merge PDF — Combine PDFs Free Online | Perotron Web",
             },
             {
                 property: "og:description",
@@ -85,8 +84,7 @@ export const Route = createFileRoute("/pdf/merge")({
             { name: "twitter:card", content: "summary_large_image" },
             {
                 name: "twitter:title",
-                content:
-                    "Merge PDF — Combine PDFs Free Online | Perotron Web",
+                content: "Merge PDF — Combine PDFs Free Online | Perotron Web",
             },
             {
                 name: "twitter:description",
@@ -94,7 +92,9 @@ export const Route = createFileRoute("/pdf/merge")({
                     "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
             },
         ],
-        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/pdf/merge" }],
+        links: [
+            { rel: "canonical", href: "https://tools.naveenmk.me/pdf/merge" },
+        ],
     }),
     component: MergePage,
 })
@@ -146,6 +146,7 @@ function SortablePdfCard({
             {...attributes}
             {...listeners}
             className={`group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow duration-200 ${overlay ? "rotate-2 cursor-grabbing shadow-2xl ring-2 ring-primary/40" : "cursor-grab hover:shadow-md active:cursor-grabbing"}`}
+            data-index={index}
         >
             {/* Drag handle (visual indicator only) */}
             {/* <div
@@ -162,6 +163,7 @@ function SortablePdfCard({
                     variant="outline"
                     size="icon"
                     aria-label="Remove file"
+                    data-testid="remove-file-btn"
                 >
                     <X className="size-3.5" />
                 </Button>
@@ -192,10 +194,14 @@ function SortablePdfCard({
                 <p
                     className="truncate text-xs font-medium text-foreground"
                     title={pdfFile.file.name}
+                    data-testid="pdf-file-name"
                 >
                     {pdfFile.file.name}
                 </p>
-                <p className="text-[10px] text-muted-foreground">
+                <p
+                    className="text-[10px] text-muted-foreground"
+                    data-testid="pdf-file-size"
+                >
                     {formatBytes(pdfFile.file.size)}
                 </p>
             </div>
@@ -540,7 +546,10 @@ function MergePage() {
                     <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                         Files to merge
                     </p>
-                    <p className="text-3xl font-bold text-foreground">
+                    <p
+                        className="text-3xl font-bold text-foreground"
+                        data-testid="merge-file-count"
+                    >
                         {files.length}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -563,6 +572,7 @@ function MergePage() {
                         mergeStatus === "loading" || mergeStatus === "merging"
                     }
                     onClick={handleMerge}
+                    data-testid="merge-btn"
                 >
                     {mergeButtonContent}
                 </Button>
@@ -579,6 +589,7 @@ function MergePage() {
                         size="sm"
                         className="w-full justify-start gap-2"
                         onClick={handleSortByName}
+                        data-testid="sort-by-name-btn"
                     >
                         {lastSort === "name" && nameSortDir === "desc" ? (
                             <SortDesc className="size-4" />
@@ -592,6 +603,7 @@ function MergePage() {
                         size="sm"
                         className="w-full justify-start gap-2"
                         onClick={handleSortBySize}
+                        data-testid="sort-by-size-btn"
                     >
                         {lastSort === "size" && sizeSortDir === "desc" ? (
                             <SortDesc className="size-4" />
@@ -610,6 +622,7 @@ function MergePage() {
                     size="sm"
                     className="w-full justify-start gap-2"
                     onClick={() => addMoreInputRef.current?.click()}
+                    data-testid="add-more-btn"
                 >
                     <Plus className="size-4" />
                     Add more PDFs
@@ -622,6 +635,7 @@ function MergePage() {
                         size="sm"
                         className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
                         onClick={clearAll}
+                        data-testid="clear-all-btn"
                     >
                         <Trash2 className="size-4" />
                         Clear all
@@ -754,7 +768,10 @@ function MergePage() {
                     </Button>
 
                     <div className="flex flex-col gap-0.5">
-                        <h1 className="text-xl font-semibold text-foreground">
+                        <h1
+                            className="text-xl font-semibold text-foreground"
+                            data-testid="arrange-heading"
+                        >
                             Arrange PDFs
                         </h1>
                         <p className="text-sm text-muted-foreground">
@@ -777,7 +794,10 @@ function MergePage() {
                         items={files.map((f) => f.id)}
                         strategy={rectSortingStrategy}
                     >
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-4">
+                        <div
+                            className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-4"
+                            data-testid="pdf-file-grid"
+                        >
                             {files.map((pf, index) => (
                                 <SortablePdfCard
                                     key={pf.id}

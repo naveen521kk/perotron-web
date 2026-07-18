@@ -19,3 +19,12 @@ todos.json
 
 public/*.whl
 
+.agents/
+public/old
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+e2e/fixtures/*.pdf
+e2e/fixtures/*.txt

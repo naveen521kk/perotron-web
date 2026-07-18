@@ -551,13 +551,14 @@ function SplitPage() {
                     <p
                         className="truncate text-sm font-medium text-foreground"
                         title={splitFile.file.name}
+                        data-testid="split-file-name"
                     >
                         {splitFile.file.name}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{formatBytes(splitFile.file.size)}</span>
+                        <span data-testid="split-file-size">{formatBytes(splitFile.file.size)}</span>
                         <span>·</span>
-                        <span>
+                        <span data-testid="split-file-page-count">
                             {splitFile.pageCount} page
                             {splitFile.pageCount !== 1 ? "s" : ""}
                         </span>
@@ -573,13 +574,14 @@ function SplitPage() {
                 className="w-full gap-2"
                 disabled={isBusy}
                 onClick={handleSplit}
+                data-testid="split-btn"
             >
                 {splitButtonContent}
             </Button>
 
             {/* Preview text */}
             {previewText && (
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground" data-testid="split-preview-text">
                     {previewText}
                 </p>
             )}
@@ -594,6 +596,7 @@ function SplitPage() {
                 onClick={() => {
                     fileInputRef.current?.click()
                 }}
+                data-testid="change-file-btn"
             >
                 <FileText className="size-4" />
                 Change file
@@ -609,6 +612,7 @@ function SplitPage() {
                         clear()
                         setSidebarOpen(false)
                     }}
+                    data-testid="clear-btn"
                 >
                     <Trash2 className="size-4" />
                     Clear
@@ -664,7 +668,7 @@ function SplitPage() {
                     </Button>
 
                     <div className="flex flex-col gap-0.5">
-                        <h1 className="text-xl font-semibold text-foreground">
+                        <h1 className="text-xl font-semibold text-foreground" data-testid="configure-heading">
                             Configure Split
                         </h1>
                         <p className="text-sm text-muted-foreground">
@@ -680,10 +684,10 @@ function SplitPage() {
                     onValueChange={(v) => setSplitMode(v as SplitMode)}
                     className="w-full max-w-2xl"
                 >
-                    <TabsList className="mb-6 grid w-full grid-cols-3">
-                        <TabsTrigger value="ranges">Ranges</TabsTrigger>
-                        <TabsTrigger value="pages">Pages</TabsTrigger>
-                        <TabsTrigger value="size">Size</TabsTrigger>
+                    <TabsList className="mb-6 grid w-full grid-cols-3" data-testid="split-tabs">
+                        <TabsTrigger value="ranges" data-testid="split-tab-ranges">Ranges</TabsTrigger>
+                        <TabsTrigger value="pages" data-testid="split-tab-pages">Pages</TabsTrigger>
+                        <TabsTrigger value="size" data-testid="split-tab-size">Size</TabsTrigger>
                     </TabsList>
 
                     {/* ── Ranges tab ── */}
@@ -694,11 +698,13 @@ function SplitPage() {
                                 setRangeMode(v as "fixed" | "custom")
                             }
                             className="flex gap-4"
+                            data-testid="range-mode-radio"
                         >
                             <div className="flex items-center gap-2">
                                 <RadioGroupItem
                                     value="fixed"
                                     id="range-fixed"
+                                    data-testid="range-mode-fixed"
                                 />
                                 <Label htmlFor="range-fixed">Fixed</Label>
                             </div>
@@ -706,6 +712,7 @@ function SplitPage() {
                                 <RadioGroupItem
                                     value="custom"
                                     id="range-custom"
+                                    data-testid="range-mode-custom"
                                 />
                                 <Label htmlFor="range-custom">Custom</Label>
                             </div>
@@ -728,6 +735,7 @@ function SplitPage() {
                                         )
                                     }
                                     className="max-w-40"
+                                    data-testid="chunk-size-input"
                                 />
                                 <p className="text-sm text-muted-foreground">
                                     Split into groups of {fixedChunkSize} page
@@ -742,11 +750,13 @@ function SplitPage() {
                                     Each range becomes a separate PDF.
                                 </p>
 
-                                <div className="flex flex-col gap-3">
-                                    {customRanges.map((range) => (
+                                <div className="flex flex-col gap-3" data-testid="custom-range-list">
+                                    {customRanges.map((range, idx) => (
                                         <div
                                             key={range.id}
                                             className="flex items-center gap-2"
+                                            data-testid="custom-range-row"
+                                            data-index={idx}
                                         >
                                             <Input
                                                 type="number"
@@ -791,6 +801,7 @@ function SplitPage() {
                                                 disabled={
                                                     customRanges.length <= 1
                                                 }
+                                                data-testid="remove-range-btn"
                                             >
                                                 <X className="size-4" />
                                             </Button>
@@ -822,6 +833,7 @@ function SplitPage() {
                                 value={pageSpec}
                                 onChange={(e) => setPageSpec(e.target.value)}
                                 className="max-w-xs"
+                                data-testid="page-spec-input"
                             />
                             <p className="text-sm text-muted-foreground">
                                 Enter comma-separated pages or ranges. Example:{" "}
@@ -857,6 +869,7 @@ function SplitPage() {
                                         )
                                     }
                                     className="w-28"
+                                    data-testid="max-size-input"
                                 />
                                 <Select
                                     value={sizeUnit}
@@ -864,7 +877,7 @@ function SplitPage() {
                                         setSizeUnit(v as SizeUnit)
                                     }
                                 >
-                                    <SelectTrigger className="w-20">
+                                    <SelectTrigger className="w-20" data-testid="size-unit-select">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
