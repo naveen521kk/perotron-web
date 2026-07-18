@@ -1,5 +1,7 @@
+node_modules/
+coverage/
+.pnpm-store/
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
-*.gen.ts
-src/components/ui/*.tsx
+src/components/react/ui/*.tsx
