@@ -2,6 +2,8 @@ packages: []
 
 allowBuilds:
   esbuild: true
-  lightningcss: true
-  unrs-resolver: true
+  sharp: true
   msw: false
+  '@posthog/cli': true
+  core-js: true
+  workerd: true
