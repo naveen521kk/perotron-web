@@ -1,6 +1,6 @@
 import React from "react"
-import PdfWorkerUrl from "../../node_modules/pdfjs-dist/build/pdf.worker.mjs?worker&url"
-import { toast } from "sonner" 
+import PdfWorkerUrl from "../../../node_modules/pdfjs-dist/build/pdf.worker.mjs?worker&url"
+import { toast } from "sonner"
 
 interface PdfThumbnailProps {
     file: File
