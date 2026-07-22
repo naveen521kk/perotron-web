@@ -1,0 +1,357 @@
+---
+import Layout from "@/layouts/main.astro"
+import ExternalLink from "@/components/external-link.astro"
+
+import { Separator } from "@/components/react/ui/separator"
+
+const title = "Terms of Use — Perotron Web"
+const description =
+    "Terms of Use for Perotron Web. Understand the conditions for using our open-source, browser-native tool platform, including disclaimers, limitations, and your responsibilities."
+---
+
+<Layout title={title} description={description}>
+    <div
+        class="container mx-auto flex max-w-3xl animate-in flex-col gap-6 px-4 py-12 duration-300 fade-in"
+    >
+        <div class="flex flex-col gap-2">
+            <h1
+                class="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl"
+            >
+                Terms of Use
+            </h1>
+            <p class="text-sm text-muted-foreground">
+                Last updated: July 4, 2026
+            </p>
+        </div>
+
+        <Separator />
+
+        {/* Section 1 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                1. Acceptance
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                By accessing or using Perotron Web, you agree to these Terms of
+                Use. If you do not agree, you should discontinue use of the
+                platform.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 2 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                2. Description
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Perotron Web is an open-source browser-based platform providing
+                productivity, developer, document, security, media, and
+                data-processing tools. Most processing occurs locally within
+                your browser.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 3 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                3. License
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Unless otherwise stated, the website, source code, and
+                documentation are provided under the applicable open-source
+                license published with the{" "}
+                <ExternalLink
+                    href="https://github.com/naveen521kk/perotron-web"
+                >
+                    project repository
+                </ExternalLink>
+                . Third-party libraries remain subject to their own licenses.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 4 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                4. User Responsibilities
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                You agree to:
+            </p>
+            <ul
+                class="flex list-disc flex-col gap-1.5 pl-6 text-sm text-muted-foreground md:text-base"
+            >
+                <li class="leading-relaxed">Comply with applicable laws</li>
+                <li class="leading-relaxed">Use the platform responsibly</li>
+                <li class="leading-relaxed">
+                    Avoid interfering with the operation of the service
+                </li>
+                <li class="leading-relaxed">
+                    Avoid attempting unauthorized access
+                </li>
+                <li class="leading-relaxed">
+                    Avoid introducing malicious software
+                </li>
+            </ul>
+        </section>
+
+        <Separator />
+
+        {/* Section 5 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                5. Local Processing
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Most Perotron tools process files locally. You remain solely
+                responsible for:
+            </p>
+            <ul
+                class="flex list-disc flex-col gap-1.5 pl-6 text-sm text-muted-foreground md:text-base"
+            >
+                <li class="leading-relaxed">Your files and backups</li>
+                <li class="leading-relaxed">Verifying generated output</li>
+                <li class="leading-relaxed">
+                    Ensuring suitability for your intended use
+                </li>
+            </ul>
+        </section>
+
+        <Separator />
+
+        {/* Section 6 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                6. No Warranty
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Perotron Web is provided &ldquo;AS IS&rdquo; and &ldquo;AS
+                AVAILABLE.&rdquo; To the fullest extent permitted by law, we
+                disclaim all warranties, including warranties of:
+            </p>
+            <ul
+                class="flex list-disc flex-col gap-1.5 pl-6 text-sm text-muted-foreground md:text-base"
+            >
+                <li class="leading-relaxed">Merchantability</li>
+                <li class="leading-relaxed">
+                    Fitness for a particular purpose
+                </li>
+                <li class="leading-relaxed">Non-infringement</li>
+                <li class="leading-relaxed">Uninterrupted availability</li>
+                <li class="leading-relaxed">Accuracy of generated results</li>
+            </ul>
+        </section>
+
+        <Separator />
+
+        {/* Section 7 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                7. Limitation of Liability
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                To the maximum extent permitted by law, Perotron and its
+                contributors shall not be liable for:
+            </p>
+            <ul
+                class="flex list-disc flex-col gap-1.5 pl-6 text-sm text-muted-foreground md:text-base"
+            >
+                <li class="leading-relaxed">
+                    Data loss or business interruption
+                </li>
+                <li class="leading-relaxed">Financial loss</li>
+                <li class="leading-relaxed">
+                    Indirect or consequential damages
+                </li>
+                <li class="leading-relaxed">
+                    Loss resulting from reliance on generated output
+                </li>
+                <li class="leading-relaxed">Corruption of files</li>
+                <li class="leading-relaxed">Browser incompatibilities</li>
+            </ul>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Users should verify important results independently.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 8 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                8. Third-Party Services
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                The platform may integrate third-party services including
+                analytics, advertising, external APIs, or community plugins. Use
+                of those services is subject to their own terms and privacy
+                policies.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 9 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                9. Future Features
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Future versions may include cloud synchronization, AI services,
+                plugins, workflow automation, user accounts, and marketplace
+                integrations. Additional terms may apply to such features.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 10 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                10. Intellectual Property
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Perotron, its branding, logos, and website design may be
+                protected by applicable intellectual property laws. Open-source
+                code remains licensed according to the project&apos;s published
+                license.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 11 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                11. Community Plugins
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Community-developed plugins are the responsibility of their
+                respective authors. Perotron does not guarantee the quality,
+                security, or correctness of third-party plugins. Users install
+                and use plugins at their own risk.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 12 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                12. Termination
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                We may suspend or restrict access if users abuse the platform or
+                attempt to compromise its security.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 13 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                13. Governing Law
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                These Terms shall be governed by the laws applicable in the
+                jurisdiction in which the project owner is established, unless
+                otherwise required by applicable consumer protection laws.
+            </p>
+        </section>
+
+        <Separator />
+
+        {/* Section 14 */}
+        <section class="flex flex-col gap-3">
+            <h2
+                class="text-xl font-bold tracking-tight text-foreground md:text-2xl"
+            >
+                14. Contact
+            </h2>
+            <p
+                class="text-sm leading-relaxed text-muted-foreground md:text-base"
+            >
+                Questions regarding these Terms may be submitted through the
+                project&apos;s official{" "}
+                <ExternalLink
+                    href="https://github.com/naveen521kk/perotron-web"
+                >
+                    GitHub repository
+                </ExternalLink>{" "}
+                or other contact methods listed on the website.
+            </p>
+        </section>
+
+        <Separator />
+
+        <p class="text-xs text-muted-foreground">
+            See also:{" "}
+            <a
+                href="/privacy"
+                class="text-primary underline-offset-4 hover:underline"
+            >
+                Privacy Policy
+            </a>
+        </p>
+    </div>
+</Layout>
