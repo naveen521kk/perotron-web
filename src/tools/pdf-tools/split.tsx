@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { DefaultProviders } from "@/components/react/providers"
 import {
     Scissors,
     UploadCloud,
@@ -11,105 +11,54 @@ import {
     FileText,
     ArrowLeft,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Button } from "@/components/react/ui/button"
+import { Separator } from "@/components/react/ui/separator"
+import { Input } from "@/components/react/ui/input"
+import { Label } from "@/components/react/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/react/ui/radio-group"
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@/components/react/ui/select"
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/react/ui/tabs"
 import {
     Sheet,
     SheetContent,
     SheetHeader,
     SheetTitle,
-} from "@/components/ui/sheet"
-import { useSplitStore } from "@/store/split-store"
-import type { SplitMode, SizeUnit } from "@/store/split-store"
+} from "@/components/react/ui/sheet"
+import { useSplitStore } from "./store/split"
+import type { SplitMode, SizeUnit } from "./store/split"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { usePostHog } from "@posthog/react"
+import { captureEvent } from "@/lib/posthog"
+import { acceptSinglePdf, formatBytes } from "./utils"
 
 /* ── Lazy-loaded components ─────────────────────────────────────── */
 
 const FooterAdBanner = lazy(() =>
-    import("@/components/ad-banner").then((m) => ({
+    import("@/components/react/ad-banner").then((m) => ({
         default: m.FooterAdBanner,
     }))
 )
 const AdBanner = lazy(() =>
-    import("@/components/ad-banner").then((m) => ({ default: m.AdBanner }))
+    import("@/components/react/ad-banner").then((m) => ({
+        default: m.AdBanner,
+    }))
 )
 const PdfThumbnail = lazy(() =>
-    import("@/components/pdf-thumbnail").then((mod) => ({
+    import("./pdf-thumbnail").then((mod) => ({
         default: mod.PdfThumbnail,
     }))
 )
-
-/* ── Route ──────────────────────────────────────────────────────── */
-
-export const Route = createFileRoute("/pdf/split")({
-    head: () => ({
-        meta: [
-            {
-                title: "Split PDF — Extract Pages from PDF Free | Perotron Web",
-            },
-            {
-                name: "description",
-                content:
-                    "Extract individual pages or split a large PDF into separate files — no uploads required. Your PDF stays in your browser and is never sent to a server.",
-            },
-            {
-                property: "og:title",
-                content:
-                    "Split PDF — Extract Pages from PDF Free | Perotron Web",
-            },
-            {
-                property: "og:description",
-                content:
-                    "Extract individual pages or split a large PDF into separate files — no uploads required. Your PDF stays in your browser and is never sent to a server.",
-            },
-            { property: "og:type", content: "website" },
-            { name: "twitter:card", content: "summary_large_image" },
-            {
-                name: "twitter:title",
-                content:
-                    "Split PDF — Extract Pages from PDF Free | Perotron Web",
-            },
-            {
-                name: "twitter:description",
-                content:
-                    "Extract individual pages or split a large PDF into separate files — no uploads required. Your PDF stays in your browser and is never sent to a server.",
-            },
-        ],
-        links: [{ rel: "canonical", href: "https://tools.naveenmk.me/pdf/split" }],
-    }),
-    component: SplitPage,
-})
-
-/* ── Helpers ─────────────────────────────────────────────────────── */
-
-function formatBytes(bytes: number) {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function acceptSinglePdf(fileList: FileList | null): File | null {
-    if (!fileList) return null
-    const files = Array.from(fileList).filter(
-        (f) => f.type === "application/pdf"
-    )
-    return files[0] ?? null
-}
-
-/* ── Main page ───────────────────────────────────────────────────── */
 
 type SplitStatus =
     | "idle"
@@ -119,7 +68,7 @@ type SplitStatus =
     | "done"
     | "error"
 
-function SplitPage() {
+function SplitPageContent() {
     const splitFile = useSplitStore((s) => s.splitFile)
     const setFile = useSplitStore((s) => s.setFile)
     const clear = useSplitStore((s) => s.clear)
@@ -140,7 +89,7 @@ function SplitPage() {
     const sizeUnit = useSplitStore((s) => s.sizeUnit)
     const setSizeUnit = useSplitStore((s) => s.setSizeUnit)
 
-    const posthog = usePostHog()
+    // const posthog = usePostHog()
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Worker + status
@@ -154,11 +103,19 @@ function SplitPage() {
 
     // Initialise worker on mount
     useEffect(() => {
-        const worker = new Worker(
-            new URL("../../lib/pdf-worker.ts", import.meta.url),
-            { type: "module" }
-        )
-        workerRef.current = worker
+        let worker: Worker | null = null
+        try {
+            worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
+                type: "module",
+            })
+            workerRef.current = worker
+        } catch (err: any) {
+            console.error(
+                "An unknown error occured when initializing worker: ",
+                err
+            )
+            toast.error("An unknown error occured when initializing worker")
+        }
 
         const analyticsHandler = (e: MessageEvent) => {
             if (e.data?.type !== "analytics") return
@@ -176,15 +133,16 @@ function SplitPage() {
                     )
                 }
             }
-            posthog?.capture(event, params)
+            // posthog?.capture(event, params)
+            captureEvent(event, params)
         }
-        worker.addEventListener("message", analyticsHandler)
+        worker?.addEventListener("message", analyticsHandler)
 
         return () => {
-            worker.terminate()
+            worker?.terminate()
             workerRef.current = null
         }
-    }, [posthog])
+    }, [])
 
     /* ── File upload handler ── */
     const handleFile = useCallback(
@@ -195,6 +153,7 @@ function SplitPage() {
             const id = ++opIdRef.current
             setSplitStatus("loading-info")
             setStatusMessage("Reading PDF info…")
+            toast.info("Reading PDF info...")
 
             try {
                 const buffer = await file.arrayBuffer()
@@ -556,7 +515,9 @@ function SplitPage() {
                         {splitFile.file.name}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span data-testid="split-file-size">{formatBytes(splitFile.file.size)}</span>
+                        <span data-testid="split-file-size">
+                            {formatBytes(splitFile.file.size)}
+                        </span>
                         <span>·</span>
                         <span data-testid="split-file-page-count">
                             {splitFile.pageCount} page
@@ -581,7 +542,10 @@ function SplitPage() {
 
             {/* Preview text */}
             {previewText && (
-                <p className="text-center text-xs text-muted-foreground" data-testid="split-preview-text">
+                <p
+                    className="text-center text-xs text-muted-foreground"
+                    data-testid="split-preview-text"
+                >
                     {previewText}
                 </p>
             )}
@@ -668,7 +632,10 @@ function SplitPage() {
                     </Button>
 
                     <div className="flex flex-col gap-0.5">
-                        <h1 className="text-xl font-semibold text-foreground" data-testid="configure-heading">
+                        <h1
+                            className="text-xl font-semibold text-foreground"
+                            data-testid="configure-heading"
+                        >
                             Configure Split
                         </h1>
                         <p className="text-sm text-muted-foreground">
@@ -684,10 +651,25 @@ function SplitPage() {
                     onValueChange={(v) => setSplitMode(v as SplitMode)}
                     className="w-full max-w-2xl"
                 >
-                    <TabsList className="mb-6 grid w-full grid-cols-3" data-testid="split-tabs">
-                        <TabsTrigger value="ranges" data-testid="split-tab-ranges">Ranges</TabsTrigger>
-                        <TabsTrigger value="pages" data-testid="split-tab-pages">Pages</TabsTrigger>
-                        <TabsTrigger value="size" data-testid="split-tab-size">Size</TabsTrigger>
+                    <TabsList
+                        className="mb-6 grid w-full grid-cols-3"
+                        data-testid="split-tabs"
+                    >
+                        <TabsTrigger
+                            value="ranges"
+                            data-testid="split-tab-ranges"
+                        >
+                            Ranges
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="pages"
+                            data-testid="split-tab-pages"
+                        >
+                            Pages
+                        </TabsTrigger>
+                        <TabsTrigger value="size" data-testid="split-tab-size">
+                            Size
+                        </TabsTrigger>
                     </TabsList>
 
                     {/* ── Ranges tab ── */}
@@ -750,7 +732,10 @@ function SplitPage() {
                                     Each range becomes a separate PDF.
                                 </p>
 
-                                <div className="flex flex-col gap-3" data-testid="custom-range-list">
+                                <div
+                                    className="flex flex-col gap-3"
+                                    data-testid="custom-range-list"
+                                >
                                     {customRanges.map((range, idx) => (
                                         <div
                                             key={range.id}
@@ -877,7 +862,10 @@ function SplitPage() {
                                         setSizeUnit(v as SizeUnit)
                                     }
                                 >
-                                    <SelectTrigger className="w-20" data-testid="size-unit-select">
+                                    <SelectTrigger
+                                        className="w-20"
+                                        data-testid="size-unit-select"
+                                    >
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -938,5 +926,15 @@ function SplitPage() {
                 />
             </aside>
         </div>
+    )
+}
+
+export function SplitPage() {
+    return (
+        <>
+            <DefaultProviders>
+                <SplitPageContent />
+            </DefaultProviders>
+        </>
     )
 }

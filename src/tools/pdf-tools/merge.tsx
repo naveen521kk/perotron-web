@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router"
 import {
     FileStack,
     UploadCloud,
@@ -12,18 +11,17 @@ import {
     Download,
     PanelLeft,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/react/ui/button"
+import { Separator } from "@/components/react/ui/separator"
 import {
     Sheet,
     SheetContent,
     SheetHeader,
     SheetTitle,
-} from "@/components/ui/sheet"
-import { useMergeStore } from "@/store/merge-store"
+} from "@/components/react/ui/sheet"
+import { useMergeStore } from "./store/merge.ts"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { usePostHog } from "@posthog/react"
 import {
     DndContext,
     closestCenter,
@@ -43,76 +41,26 @@ import {
     useSortable,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import type { PdfFile } from "@/store/merge-store"
+import type { PdfFile } from "./store/merge.ts"
+import { formatBytes, acceptPdfFiles } from "./utils.ts"
+import { captureEvent } from "@/lib/posthog.ts"
+import { DefaultProviders } from "@/components/react/providers.tsx"
 
-/* ── Route ──────────────────────────────────────────────────────── */
 const AdBanner = lazy(() =>
-    import("@/components/ad-banner").then((m) => ({ default: m.AdBanner }))
+    import("@/components/react/ad-banner").then((m) => ({
+        default: m.AdBanner,
+    }))
 )
 const FooterAdBanner = lazy(() =>
-    import("@/components/ad-banner").then((m) => ({
+    import("@/components/react/ad-banner").then((m) => ({
         default: m.FooterAdBanner,
     }))
 )
 const PdfThumbnail = lazy(() =>
-    import("@/components/pdf-thumbnail").then((mod) => ({
+    import("./pdf-thumbnail.tsx").then((mod) => ({
         default: mod.PdfThumbnail,
     }))
 )
-
-export const Route = createFileRoute("/pdf/merge")({
-    head: () => ({
-        meta: [
-            {
-                title: "Merge PDF — Combine PDFs Free Online | Perotron Web",
-            },
-            {
-                name: "description",
-                content:
-                    "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
-            },
-            {
-                property: "og:title",
-                content: "Merge PDF — Combine PDFs Free Online | Perotron Web",
-            },
-            {
-                property: "og:description",
-                content:
-                    "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
-            },
-            { property: "og:type", content: "website" },
-            { name: "twitter:card", content: "summary_large_image" },
-            {
-                name: "twitter:title",
-                content: "Merge PDF — Combine PDFs Free Online | Perotron Web",
-            },
-            {
-                name: "twitter:description",
-                content:
-                    "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded.",
-            },
-        ],
-        links: [
-            { rel: "canonical", href: "https://tools.naveenmk.me/pdf/merge" },
-        ],
-    }),
-    component: MergePage,
-})
-
-/* ── Helpers ─────────────────────────────────────────────────────── */
-
-function formatBytes(bytes: number) {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function acceptPdfFiles(fileList: FileList | null): File[] {
-    if (!fileList) return []
-    return Array.from(fileList).filter((f) => f.type === "application/pdf")
-}
-
-/* ── Sortable card ───────────────────────────────────────────────── */
 
 function SortablePdfCard({
     pdfFile,
@@ -209,18 +157,16 @@ function SortablePdfCard({
     )
 }
 
-/* ── Main page ───────────────────────────────────────────────────── */
-
 type MergeStatus = "idle" | "loading" | "merging" | "done" | "error"
 
-function MergePage() {
+function MergePageContent() {
     const files = useMergeStore((s) => s.files)
     const addFiles = useMergeStore((s) => s.addFiles)
     const reorderFiles = useMergeStore((s) => s.reorderFiles)
     const sortByName = useMergeStore((s) => s.sortByName)
     const sortBySize = useMergeStore((s) => s.sortBySize)
     const clearAll = useMergeStore((s) => s.clearAll)
-    const posthog = usePostHog()
+    // const posthog = usePostHog()
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const addMoreInputRef = useRef<HTMLInputElement>(null)
@@ -236,11 +182,22 @@ function MergePage() {
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     useEffect(() => {
-        const worker = new Worker(
-            new URL("../../lib/pdf-worker.ts", import.meta.url),
-            { type: "module" }
-        )
-        workerRef.current = worker
+        let worker: Worker | null = null
+        try {
+            worker = new Worker(
+                new URL("./pdf-worker.ts", import.meta.url),
+                {
+                    type: "module",
+                }
+            )
+            workerRef.current = worker
+        } catch (err: any) {
+            console.error(
+                "An unknown error occured when initializing worker: ",
+                err
+            )
+            toast.error("An unknown error occured when initializing worker")
+        }
 
         // Forward analytics events posted from the worker to gtag and PostHog on the main thread
         const analyticsHandler = (e: MessageEvent) => {
@@ -264,14 +221,14 @@ function MergePage() {
                     )
                 }
             }
-            posthog?.capture(event, params)
+            captureEvent(event, params)
         }
-        worker.addEventListener("message", analyticsHandler)
+        worker?.addEventListener("message", analyticsHandler)
         return () => {
-            worker.terminate()
+            worker?.terminate()
             workerRef.current = null
         }
-    }, [posthog])
+    }, [])
 
     // dnd-kit state
     const [activeId, setActiveId] = useState<string | null>(null)
@@ -857,5 +814,15 @@ function MergePage() {
                 />
             </aside>
         </div>
+    )
+}
+
+export function MergePage() {
+    return (
+        <>
+            <DefaultProviders>
+                <MergePageContent />
+            </DefaultProviders>
+        </>
     )
 }

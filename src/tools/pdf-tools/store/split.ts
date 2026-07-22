@@ -41,7 +41,11 @@ interface SplitState {
     setFixedChunkSize: (size: number) => void
     addCustomRange: () => void
     removeCustomRange: (id: string) => void
-    updateCustomRange: (id: string, field: "start" | "end", value: string) => void
+    updateCustomRange: (
+        id: string,
+        field: "start" | "end",
+        value: string
+    ) => void
     setPageSpec: (spec: string) => void
     setMaxSizeValue: (value: number) => void
     setSizeUnit: (unit: SizeUnit) => void
@@ -52,9 +56,7 @@ function makeRangeId() {
     return `range-${Date.now()}-${_counter++}`
 }
 
-const initialRanges: CustomRange[] = [
-    { id: makeRangeId(), start: "", end: "" },
-]
+const initialRanges: CustomRange[] = [{ id: makeRangeId(), start: "", end: "" }]
 
 export const useSplitStore = create<SplitState>((set) => ({
     splitFile: null,
