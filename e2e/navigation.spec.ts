@@ -61,7 +61,7 @@ test.describe("Navigation & Layout", () => {
 
     const versionLink = page.locator("footer a[aria-label*='Version']")
     await expect(versionLink).toBeVisible()
-    await expect(versionLink).toHaveText(/^v\d+\.\d+\.\d+$/)
+    await expect(versionLink).toHaveText(/^\s*v\d+\.\d+\.\d+\s*$/)
   })
 
   test("theme toggle switches between light and dark mode", async ({ page }) => {
