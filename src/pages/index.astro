@@ -1,0 +1,381 @@
+---
+import Layout from "@/layouts/main.astro"
+import { Button } from "@/components/react/ui/button"
+import {
+    FileStack,
+    Scissors,
+    ShieldCheck,
+    Code2,
+    QrCode,
+    // FileText,
+    // Image as ImageIcon,
+    // Terminal,
+    // Database,
+    // Briefcase,
+    Lock,
+    // Video,
+    // Sparkles,
+    // Wrench,
+    // Download,
+    Zap,
+    WifiOff,
+    FileDown,
+    ArrowRight,
+    ServerOff,
+} from "lucide-react"
+
+import {
+    FeatureCard,
+    ToolCard,
+    // CategoryBadge,
+    HeroButtons,
+} from "@/components/react/index-page"
+import { FooterAdBanner } from "@/components/react/ad-banner"
+---
+
+<Layout>
+    <div class="flex w-full flex-1 flex-col items-center">
+        <section
+            class="mx-auto flex w-full max-w-4xl animate-in flex-col items-center gap-8 px-4 pt-24 pb-16 text-center"
+            id="hero"
+        >
+            <div class="space-y-4">
+                <h1
+                    class="text-5xl leading-[1.1] font-bold tracking-tight text-foreground md:text-[5rem] lg:text-[5.5rem]"
+                >
+                    Perotron Web
+                </h1>
+                <p
+                    class="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl"
+                >
+                    Browser-native tools for developers, analysts, and
+                    professionals. Fast, private, and built to work entirely on
+                    your device.
+                </p>
+            </div>
+
+            <div class="mt-4 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
+                <HeroButtons client:load />
+            </div>
+
+            <div
+                class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm font-medium text-muted-foreground"
+            >
+                <div class="flex items-center gap-1.5">
+                    <ShieldCheck className="size-4 text-primary" /> Runs Locally
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <Code2 className="size-4 text-primary" /> Open Source
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <Lock className="size-4 text-primary" /> Privacy First
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <WifiOff className="size-4 text-primary" /> Works Offline*
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <FileDown className="size-4 text-primary" /> No File Uploads
+                </div>
+            </div>
+            <p class="text-xs text-muted-foreground/60">
+                * Offline after installation or once resources are cached.
+            </p>
+        </section>
+
+        <section
+            class="w-full border-y border-border/50 bg-primary/5 px-4 py-12 text-center"
+        >
+            <div class="mx-auto max-w-3xl">
+                <h2
+                    class="text-xl font-medium tracking-tight text-foreground md:text-2xl"
+                >
+                    No uploads. No accounts. No subscriptions.
+                    <br />
+                    <span class="mt-2 inline-block font-semibold text-primary">
+                        Just fast, private tools.
+                    </span>
+                </h2>
+                <p
+                    class="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground"
+                >
+                    Perotron Web is a collection of browser-native tools powered
+                    by modern Web technologies like WebAssembly. Your files and
+                    data stay on your device—nothing is uploaded unless you
+                    explicitly choose to.
+                </p>
+            </div>
+        </section>
+
+        {/* ── Why Perotron? ─────────────────────────────────────────────── */}
+        <section class="mx-auto w-full max-w-6xl px-4 py-24" id="why">
+            <div class="mb-16 text-center">
+                <h2 class="mb-4 text-3xl font-bold tracking-tight">
+                    Why Perotron?
+                </h2>
+            </div>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <FeatureCard
+                    icon="server-off"
+                    title="Browser-Native"
+                    description="Everything runs directly in your browser. No waiting for uploads. No server-side processing."
+                    client:load
+                />
+                <FeatureCard
+                    icon="lock"
+                    title="Privacy by Default"
+                    description="Your documents, images, and data remain on your device. No hidden uploads or unnecessary tracking."
+                    client:load
+                />
+                <FeatureCard
+                    icon="zap"
+                    title="Fast"
+                    description="Powered by WebAssembly and optimized for modern browsers. Desktop-class performance."
+                    client:load
+                />
+                <FeatureCard
+                    icon="code-2"
+                    title="Open Source"
+                    description="Built in the open. Review the source, self-host or contribute new tools."
+                    client:load
+                />
+            </div>
+        </section>
+
+        {/* ── Categories ─────────────────────────────────────────────── */}
+        {
+            /* <section
+                    id="tools"
+                    class="mx-auto w-full max-w-5xl scroll-m-20 px-4 py-12"
+                >
+                    <div class="mb-10 text-center">
+                        <h2 class="mb-4 text-3xl font-bold tracking-tight">
+                            Categories
+                        </h2>
+                        <p class="text-muted-foreground">
+                            Find the right tool for the job.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <CategoryBadge
+                            icon={<FileText class="size-4" />}
+                            label="Documents"
+                        />
+                        <CategoryBadge
+                            icon={<ImageIcon class="size-4" />}
+                            label="Images"
+                        />
+                        <CategoryBadge
+                            icon={<Terminal class="size-4" />}
+                            label="Developer"
+                        />
+                        <CategoryBadge
+                            icon={<Database class="size-4" />}
+                            label="Data"
+                        />
+                        <CategoryBadge
+                            icon={<Briefcase class="size-4" />}
+                            label="Business"
+                        />
+                        <CategoryBadge
+                            icon={<Lock class="size-4" />}
+                            label="Security"
+                        />
+                        <CategoryBadge
+                            icon={<Video class="size-4" />}
+                            label="Media"
+                        />
+                        <CategoryBadge
+                            icon={<Sparkles class="size-4" />}
+                            label="AI"
+                        />
+                        <CategoryBadge
+                            icon={<Wrench class="size-4" />}
+                            label="Utilities"
+                        />
+                    </div>
+                </section> */
+        }
+
+        {
+            /* ── Featured Tools ─────────────────────────────────────────────── */
+        }
+        <section class="mx-auto w-full max-w-5xl px-4 pb-24" id="tools">
+            <div class="mb-12 text-center">
+                <h2 class="mb-4 text-3xl font-bold tracking-tight">
+                    Featured Tools
+                </h2>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <ToolCard
+                    to="/pdf/merge"
+                    icon="file-stack"
+                    title="PDF Merge"
+                    description="Combine multiple PDFs into one document."
+                    client:load
+                />
+                <ToolCard
+                    to="/pdf/split"
+                    icon="scissors"
+                    title="PDF Split"
+                    description="Extract individual pages from a PDF."
+                    client:load
+                />
+                <ToolCard
+                    to="/qr/generator"
+                    icon="qr-code"
+                    title="QR Generator"
+                    description="Create custom QR codes."
+                    client:load
+                />
+            </div>
+        </section>
+
+        {/* ── Philosophy ─────────────────────────────────────────────── */}
+        <section class="mx-auto w-full max-w-3xl px-4 py-24 text-center">
+            <h2 class="mb-6 text-3xl font-bold tracking-tight">
+                Designed for Local Computing
+            </h2>
+            <p class="text-lg leading-relaxed text-muted-foreground">
+                We believe powerful software doesn't always need a server.
+                Perotron Web brings modern computing directly into your browser
+                using WebAssembly, allowing you to process documents, analyze
+                data, transform files, and build workflows while keeping control
+                of your information.
+            </p>
+        </section>
+
+        {
+            /* ── Future Section ─────────────────────────────────────────────── */
+        }
+        {
+            /* <section class="w-full border-y border-border bg-muted/30 px-4 py-24">
+                    <div class="mx-auto max-w-5xl">
+                        <div class="grid items-center gap-16 md:grid-cols-2">
+                            <div>
+                                <h2 class="mb-4 text-3xl font-bold tracking-tight">
+                                    More Than Online Tools
+                                </h2>
+                                <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
+                                    Perotron is evolving into a browser-native
+                                    computing platform.
+                                </p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-6">
+                                <div class="flex items-center gap-3 font-medium text-foreground">
+                                    <div class="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                                    Plugin ecosystem
+                                </div>
+                                <div class="flex items-center gap-3 font-medium text-foreground">
+                                    <div class="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                                    Custom workflows
+                                </div>
+                                <div class="flex items-center gap-3 font-medium text-foreground">
+                                    <div class="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                                    AI running locally
+                                </div>
+                                <div class="flex items-center gap-3 font-medium text-foreground">
+                                    <div class="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                                    Browser automation
+                                </div>
+                                <div class="flex items-center gap-3 font-medium text-foreground">
+                                    <div class="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                                    Developer SDK
+                                </div>
+                                <div class="flex items-center gap-3 font-medium text-foreground">
+                                    <div class="size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                                    Desktop application
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section> */
+        }
+
+        {
+            /* ── PWA & Open Source ─────────────────────────────────────────────── */
+        }
+        {
+            /* <section class="mx-auto w-full max-w-5xl px-4 py-24" id="install">
+                    <div class="grid gap-8 md:grid-cols-2">
+                        <div class="flex flex-col items-start gap-4 rounded-2xl border border-border bg-card p-8 shadow-sm">
+                            <div class="rounded-xl bg-primary/10 p-3 text-primary">
+                                <Download class="size-6" />
+                            </div>
+                            <h3 class="text-2xl font-bold">
+                                Install Once. Use Anywhere.
+                            </h3>
+                            <p class="leading-relaxed text-muted-foreground">
+                                Install Perotron Web for instant access from
+                                your desktop or home screen.
+                            </p>
+                            <ul class="mt-2 mb-4 space-y-3 text-sm text-muted-foreground">
+                                <li class="flex items-center gap-2">
+                                    <div class="size-1.5 rounded-full bg-muted-foreground/50" />{" "}
+                                    Launch like a native app
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <div class="size-1.5 rounded-full bg-muted-foreground/50" />{" "}
+                                    Offline support
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <div class="size-1.5 rounded-full bg-muted-foreground/50" />{" "}
+                                    Automatic updates
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <div class="size-1.5 rounded-full bg-muted-foreground/50" />{" "}
+                                    Fast startup
+                                </li>
+                            </ul>
+                            <Button class="mt-auto" variant="secondary">
+                                Install App
+                            </Button>
+                        </div>
+
+                        <div class="flex flex-col items-start gap-4 rounded-2xl border border-border bg-card p-8 shadow-sm">
+                            <div class="rounded-xl bg-primary/10 p-3 text-primary">
+                                <SiGithub class="size-6" />
+                            </div>
+                            <h3 class="text-2xl font-bold">
+                                Built Together
+                            </h3>
+                            <p class="leading-relaxed text-muted-foreground">
+                                Perotron Web is open source. Whether you fix a
+                                bug, build a new tool, or suggest an idea,
+                                contributions are always welcome.
+                            </p>
+                            <div class="mt-auto flex flex-wrap gap-3 pt-4">
+                                <Button asChild>
+                                    <a
+                                        href="https://github.com/naveen521kk/perotron-web"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        GitHub
+                                    </a>
+                                </Button>
+                                <Button variant="outline" asChild>
+                                    <a
+                                        href="#"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Documentation
+                                    </a>
+                                </Button>
+                                <Button variant="outline" asChild>
+                                    <a
+                                        href="https://github.com/naveen521kk/perotron-web/issues"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Report Issue
+                                    </a>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </section> */
+        }
+        <FooterAdBanner client:load />
+    </div>
+</Layout>
