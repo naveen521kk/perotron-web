@@ -56,7 +56,7 @@ test.describe("PDF Split Tool", () => {
       const canonical = page.locator('link[rel="canonical"]')
       await expect(canonical).toHaveAttribute(
         "href",
-        "https://tools.naveenmk.me/pdf/split"
+        "https://tools.naveenmk.me/pdf/split/"
       )
     })
   })

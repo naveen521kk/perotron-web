@@ -46,7 +46,7 @@ test.describe("PDF Merge Tool", () => {
       const canonical = page.locator('link[rel="canonical"]')
       await expect(canonical).toHaveAttribute(
         "href",
-        "https://tools.naveenmk.me/pdf/merge"
+        "https://tools.naveenmk.me/pdf/merge/"
       )
     })
   })
