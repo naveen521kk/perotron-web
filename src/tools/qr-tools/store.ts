@@ -138,13 +138,13 @@ const defaultStyle: QrStyleOptions = {
 }
 
 const defaultLogo: QrLogoOptions = {
-    logoSrc: null,
+    logoSrc: "/qr-logos/perotron.svg",
     logoSize: 0.4,
     logoMargin: 5,
 }
 
 const defaultAdvanced: QrAdvancedOptions = {
-    errorCorrection: "M",
+    errorCorrection: "H",
     size: 400,
     margin: 10,
 }
@@ -154,7 +154,7 @@ const defaultAdvanced: QrAdvancedOptions = {
 function buildQrString(type: ContentType, data: ContentDataMap): string {
     switch (type) {
         case "url":
-            return data.url.url || "https://example.com"
+            return data.url.url || "https://perotron.com"
 
         case "text":
             return data.text.text || "Hello World"

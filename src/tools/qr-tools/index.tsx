@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router"
 import {
     QrCode,
     Download,
@@ -9,187 +8,87 @@ import {
     Palette,
     Settings2,
     Type,
-    Link2,
-    Wifi,
-    MessageCircle,
-    ContactRound,
     ChevronDown,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/react/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+} from "@/components/react/ui/dropdown-menu"
+import { Input } from "@/components/react/ui/input"
+import { Label } from "@/components/react/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/react/ui/radio-group"
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from "@/components/react/ui/select"
 
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Slider } from "@/components/ui/slider"
+} from "@/components/react/ui/accordion"
+import {
+    ToggleGroup,
+    ToggleGroupItem,
+} from "@/components/react/ui/toggle-group"
+import { Slider } from "@/components/react/ui/slider"
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Separator } from "@/components/ui/separator"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useQrStore } from "@/store/qr-store"
+} from "@/components/react/ui/tooltip"
+import { Separator } from "@/components/react/ui/separator"
+import { Card } from "@/components/react/ui/card"
+import { Badge } from "@/components/react/ui/badge"
+import { useQrStore } from "./store"
 import type {
-    ContentType,
     DotType,
     CornerSquareType,
     CornerDotType,
     ErrorCorrectionLevel,
     WifiEncryption,
-} from "@/store/qr-store"
+} from "./store"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import QRCodeStyling from "qr-code-styling"
+import {
+    DOT_TYPES,
+    CORNER_SQUARE_TYPES,
+    CORNER_DOT_TYPES,
+    ERROR_CORRECTION_INFO,
+    EXAMPLE_LOGOS,
+    CONTENT_TABS,
+} from "./constants"
+import { DefaultProviders } from "@/components/react/providers"
 
 /* ── Lazy-loaded ad components ─────────────────────────────────── */
 
 const AdBanner = lazy(() =>
-    import("@/components/ad-banner").then((m) => ({ default: m.AdBanner }))
+    import("@/components/react/ad-banner").then((m) => ({
+        default: m.AdBanner,
+    }))
 )
 const FooterAdBanner = lazy(() =>
-    import("@/components/ad-banner").then((m) => ({
+    import("@/components/react/ad-banner").then((m) => ({
         default: m.FooterAdBanner,
     }))
 )
 
-/* ── Route ──────────────────────────────────────────────────────── */
-
-export const Route = createFileRoute("/qr/generator")({
-    head: () => ({
-        meta: [
-            {
-                title: "QR Code Generator — Create Custom QR Codes | Perotron Web",
-            },
-            {
-                name: "description",
-                content:
-                    "Generate free, custom QR codes for URLs, WiFi, vCards, WhatsApp, and plain text. Style with custom colors, dot shapes, and logos. Download as JPEG, PNG or SVG — all in your browser.",
-            },
-            {
-                property: "og:title",
-                content:
-                    "QR Code Generator — Create Custom QR Codes | Perotron Web",
-            },
-            {
-                property: "og:description",
-                content:
-                    "Generate free, custom QR codes for URLs, WiFi, vCards, WhatsApp, and plain text. Style with custom colors, dot shapes, and logos. Download as JPEG, PNG or SVG — all in your browser.",
-            },
-            { property: "og:type", content: "website" },
-            { name: "twitter:card", content: "summary_large_image" },
-            {
-                name: "twitter:title",
-                content:
-                    "QR Code Generator — Create Custom QR Codes | Perotron Web",
-            },
-            {
-                name: "twitter:description",
-                content:
-                    "Generate free, custom QR codes for URLs, WiFi, vCards, WhatsApp, and plain text. Style with custom colors, dot shapes, and logos. Download as JPEG, PNG or SVG — all in your browser.",
-            },
-        ],
-        links: [
-            {
-                rel: "canonical",
-                href: "https://tools.naveenmk.me/qr/generator",
-            },
-        ],
-    }),
-    component: QrGeneratorPage,
-})
-
-/* ── Constants ──────────────────────────────────────────────────── */
-
-const DOT_TYPES: { value: DotType; label: string }[] = [
-    { value: "square", label: "Square" },
-    { value: "dots", label: "Dots" },
-    { value: "rounded", label: "Rounded" },
-    { value: "extra-rounded", label: "Extra Round" },
-    { value: "classy", label: "Classy" },
-    { value: "classy-rounded", label: "Classy Round" },
-]
-
-const CORNER_SQUARE_TYPES: { value: CornerSquareType; label: string }[] = [
-    { value: "square", label: "Square" },
-    { value: "dot", label: "Dot" },
-    { value: "extra-rounded", label: "Rounded" },
-]
-
-const CORNER_DOT_TYPES: { value: CornerDotType; label: string }[] = [
-    { value: "square", label: "Square" },
-    { value: "dot", label: "Dot" },
-]
-
-const ERROR_CORRECTION_INFO: Record<
-    ErrorCorrectionLevel,
-    { label: string; detail: string }
-> = {
-    L: {
-        label: "Low (7%)",
-        detail: "Smallest QR code. Best when the code will always be displayed cleanly (screens, pristine prints).",
-    },
-    M: {
-        label: "Medium (15%)",
-        detail: "Good default. Handles minor scuffs and partial obstruction.",
-    },
-    Q: {
-        label: "Quartile (25%)",
-        detail: "Survives moderate damage. Use for printed materials that may get worn.",
-    },
-    H: {
-        label: "High (30%)",
-        detail: "Maximum resilience. Required when embedding a logo — the logo obscures part of the code.",
-    },
-}
-
-const EXAMPLE_LOGOS = [
-    { name: "GitHub", src: "/qr-logos/github.svg" },
-    { name: "X", src: "/qr-logos/x-twitter.svg" },
-    { name: "LinkedIn", src: "/qr-logos/linkedin.svg" },
-    { name: "Instagram", src: "/qr-logos/instagram.svg" },
-    { name: "YouTube", src: "/qr-logos/youtube.svg" },
-    { name: "WhatsApp", src: "/qr-logos/whatsapp.svg" },
-]
-
-const CONTENT_TABS: { value: ContentType; label: string; icon: React.ReactNode }[] = [
-    { value: "url", label: "URL", icon: <Link2 className="size-3.5" /> },
-    { value: "text", label: "Text", icon: <Type className="size-3.5" /> },
-    { value: "wifi", label: "WiFi", icon: <Wifi className="size-3.5" /> },
-    { value: "vcard", label: "vCard", icon: <ContactRound className="size-3.5" /> },
-    { value: "whatsapp", label: "WhatsApp", icon: <MessageCircle className="size-3.5" /> },
-]
-
 /* ── Main Page ──────────────────────────────────────────────────── */
 
-function QrGeneratorPage() {
+function QrGeneratorPageContent() {
     return (
         <>
             <div className="flex w-full flex-1">
-                {/* ── Main content ── */}
                 <div className="flex flex-1 flex-col items-center px-4">
-                    {/* ── Hero ── */}
                     <section className="mx-auto flex w-full max-w-4xl animate-in flex-col items-center gap-4 pt-12 pb-8 text-center duration-700 fade-in slide-in-from-bottom-6">
                         <div className="flex size-14 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
                             <QrCode className="size-7" />
@@ -198,16 +97,15 @@ function QrGeneratorPage() {
                             QR Code Generator
                         </h1>
                         <p className="max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                            Create custom-styled QR codes for URLs, WiFi, contacts,
-                            and more. Add your logo, pick your colors — download
-                            instantly.
+                            Create custom-styled QR codes for URLs, WiFi,
+                            contacts, and more. Add your logo, pick your colors
+                            — download instantly.
                         </p>
                     </section>
 
-                    {/* ── Main layout ── */}
                     <section className="mx-auto w-full max-w-6xl animate-in pb-16 duration-500 fade-in slide-in-from-bottom-4">
                         <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-                            <div className="order-2 lg:order-1 lg:sticky lg:top-20 lg:self-start">
+                            <div className="order-2 lg:sticky lg:top-20 lg:order-1 lg:self-start">
                                 <PreviewPanel />
                             </div>
                             <div className="order-1 lg:order-2">
@@ -217,8 +115,7 @@ function QrGeneratorPage() {
                     </section>
                 </div>
 
-                {/* ── Right sidebar ad (lg+ only) ── */}
-                <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] shrink-0 flex-col items-start gap-4 p-4 xl:flex lg:max-w-lg xl:w-1/4 2xl:w-1/3">
+                <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] shrink-0 flex-col items-start gap-4 p-4 lg:max-w-lg xl:flex xl:w-1/4 2xl:w-1/3">
                     <Suspense fallback={null}>
                         <AdBanner
                             slot="3456430201"
@@ -234,6 +131,16 @@ function QrGeneratorPage() {
     )
 }
 
+export function QrGeneratorPage() {
+    return (
+        <>
+            <DefaultProviders>
+                <QrGeneratorPageContent />
+            </DefaultProviders>
+        </>
+    )
+}
+
 /* ── Config Panel ───────────────────────────────────────────────── */
 
 function ConfigPanel() {
@@ -244,7 +151,6 @@ function ConfigPanel() {
                 defaultValue={["content", "style", "logo", "advanced"]}
                 className="w-full"
             >
-                {/* ── Content Type ── */}
                 <AccordionItem value="content">
                     <AccordionTrigger>
                         <div className="flex items-center gap-2">
@@ -256,8 +162,6 @@ function ConfigPanel() {
                         <ContentSection />
                     </AccordionContent>
                 </AccordionItem>
-
-                {/* ── Style ── */}
                 <AccordionItem value="style">
                     <AccordionTrigger>
                         <div className="flex items-center gap-2">
@@ -265,12 +169,10 @@ function ConfigPanel() {
                             Style
                         </div>
                     </AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionContent className="h-auto">
                         <StyleSection />
                     </AccordionContent>
                 </AccordionItem>
-
-                {/* ── Logo ── */}
                 <AccordionItem value="logo">
                     <AccordionTrigger>
                         <div className="flex items-center gap-2">
@@ -278,12 +180,10 @@ function ConfigPanel() {
                             Logo
                         </div>
                     </AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionContent className="h-auto">
                         <LogoSection />
                     </AccordionContent>
                 </AccordionItem>
-
-                {/* ── Advanced ── */}
                 <AccordionItem value="advanced">
                     <AccordionTrigger>
                         <div className="flex items-center gap-2">
@@ -291,7 +191,7 @@ function ConfigPanel() {
                             Advanced
                         </div>
                     </AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionContent className="h-auto">
                         <AdvancedSection />
                     </AccordionContent>
                 </AccordionItem>
@@ -313,9 +213,7 @@ function ContentSection() {
         return () => window.removeEventListener("resize", checkMobile)
     }, [])
 
-    const visibleButtons = isMobile
-        ? ["url", "text"]
-        : ["url", "text", "wifi"]
+    const visibleButtons = isMobile ? ["url", "text"] : ["url", "text", "wifi"]
 
     const dropdownTabs = CONTENT_TABS.filter(
         (tab) => !visibleButtons.includes(tab.value)
@@ -330,7 +228,10 @@ function ContentSection() {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-2" data-testid="content-type-tabs">
+            <div
+                className="flex flex-wrap gap-2"
+                data-testid="content-type-tabs"
+            >
                 {CONTENT_TABS.filter((tab) =>
                     visibleButtons.includes(tab.value)
                 ).map((tab) => {
@@ -340,7 +241,7 @@ function ContentSection() {
                             key={tab.value}
                             variant={isActive ? "default" : "outline"}
                             size="sm"
-                            className="flex items-center gap-1.5 h-9"
+                            className="flex h-9 items-center gap-1.5"
                             onClick={() => setContentType(tab.value)}
                             data-testid={`content-tab-${tab.value}`}
                             data-active={isActive ? "true" : "false"}
@@ -356,7 +257,7 @@ function ContentSection() {
                         <Button
                             variant={isActiveInDropdown ? "default" : "outline"}
                             size="sm"
-                            className="flex items-center gap-1.5 h-9"
+                            className="flex h-9 items-center gap-1.5"
                             data-testid="content-tab-more"
                         >
                             {isActiveInDropdown && activeDropdownTab ? (
@@ -375,7 +276,7 @@ function ContentSection() {
                             <DropdownMenuItem
                                 key={tab.value}
                                 onClick={() => setContentType(tab.value)}
-                                className="flex items-center gap-2 cursor-pointer"
+                                className="flex cursor-pointer items-center gap-2"
                                 data-testid={`content-tab-${tab.value}`}
                             >
                                 {tab.icon}
@@ -426,7 +327,7 @@ function TextForm() {
             <Label htmlFor="qr-text">Text</Label>
             <textarea
                 id="qr-text"
-                className="flex min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                 placeholder="Enter your text here…"
                 value={data.text}
                 onChange={(e) => update("text", { text: e.target.value })}
@@ -482,9 +383,7 @@ function VCardForm() {
                     id="vc-title"
                     placeholder="Software Engineer"
                     value={data.title}
-                    onChange={(e) =>
-                        update("vcard", { title: e.target.value })
-                    }
+                    onChange={(e) => update("vcard", { title: e.target.value })}
                 />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -494,9 +393,7 @@ function VCardForm() {
                     type="tel"
                     placeholder="+1 234 567 890"
                     value={data.phone}
-                    onChange={(e) =>
-                        update("vcard", { phone: e.target.value })
-                    }
+                    onChange={(e) => update("vcard", { phone: e.target.value })}
                 />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -506,9 +403,7 @@ function VCardForm() {
                     type="email"
                     placeholder="john@example.com"
                     value={data.email}
-                    onChange={(e) =>
-                        update("vcard", { email: e.target.value })
-                    }
+                    onChange={(e) => update("vcard", { email: e.target.value })}
                 />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -518,9 +413,7 @@ function VCardForm() {
                     type="url"
                     placeholder="https://example.com"
                     value={data.url}
-                    onChange={(e) =>
-                        update("vcard", { url: e.target.value })
-                    }
+                    onChange={(e) => update("vcard", { url: e.target.value })}
                 />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -586,9 +479,7 @@ function WiFiForm() {
                     id="wifi-ssid"
                     placeholder="MyWiFiNetwork"
                     value={data.ssid}
-                    onChange={(e) =>
-                        update("wifi", { ssid: e.target.value })
-                    }
+                    onChange={(e) => update("wifi", { ssid: e.target.value })}
                 />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -736,8 +627,7 @@ function StyleSection() {
                     variant="outline"
                     value={style.cornerDotType}
                     onValueChange={(v) => {
-                        if (v)
-                            setStyle({ cornerDotType: v as CornerDotType })
+                        if (v) setStyle({ cornerDotType: v as CornerDotType })
                     }}
                     className="flex flex-wrap"
                     data-testid="corner-dot-toggle"
@@ -871,7 +761,10 @@ function LogoSection() {
                 <Label className="text-xs text-muted-foreground">
                     Or pick an example
                 </Label>
-                <div className="grid grid-cols-6 gap-2" data-testid="example-logos">
+                <div
+                    className="grid grid-cols-7 gap-2"
+                    data-testid="example-logos"
+                >
                     {EXAMPLE_LOGOS.map((ex) => (
                         <TooltipProvider key={ex.name}>
                             <Tooltip>
@@ -887,7 +780,11 @@ function LogoSection() {
                                                 : "border-border"
                                         }`}
                                         data-testid={`logo-example-${ex.name.toLowerCase()}`}
-                                        data-selected={logo.logoSrc === ex.src ? "true" : "false"}
+                                        data-selected={
+                                            logo.logoSrc === ex.src
+                                                ? "true"
+                                                : "false"
+                                        }
                                     >
                                         <img
                                             src={ex.src}
@@ -911,7 +808,10 @@ function LogoSection() {
                             <Label className="text-xs text-muted-foreground">
                                 Logo Size
                             </Label>
-                            <span className="text-xs tabular-nums text-muted-foreground" data-testid="logo-size-value">
+                            <span
+                                className="text-xs text-muted-foreground tabular-nums"
+                                data-testid="logo-size-value"
+                            >
                                 {Math.round(logo.logoSize * 100)}%
                             </span>
                         </div>
@@ -931,7 +831,10 @@ function LogoSection() {
                             <Label className="text-xs text-muted-foreground">
                                 Logo Margin
                             </Label>
-                            <span className="text-xs tabular-nums text-muted-foreground" data-testid="logo-margin-value">
+                            <span
+                                className="text-xs text-muted-foreground tabular-nums"
+                                data-testid="logo-margin-value"
+                            >
                                 {logo.logoMargin}px
                             </span>
                         </div>
@@ -940,9 +843,7 @@ function LogoSection() {
                             max={20}
                             step={1}
                             value={[logo.logoMargin]}
-                            onValueChange={([v]) =>
-                                setLogo({ logoMargin: v })
-                            }
+                            onValueChange={([v]) => setLogo({ logoMargin: v })}
                             data-testid="logo-margin-slider"
                         />
                     </div>
@@ -997,7 +898,7 @@ function AdvancedSection() {
                         <label
                             key={key}
                             htmlFor={`ec-${key}`}
-                            className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 transition-colors has-[:checked]:border-primary/40 has-[:checked]:bg-primary/5 hover:bg-muted"
+                            className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted has-[:checked]:border-primary/40 has-[:checked]:bg-primary/5"
                             data-testid={`ec-label-${key}`}
                         >
                             <RadioGroupItem
@@ -1026,7 +927,10 @@ function AdvancedSection() {
                     <Label className="text-xs text-muted-foreground">
                         QR Code Size
                     </Label>
-                    <span className="text-xs tabular-nums text-muted-foreground" data-testid="qr-size-value">
+                    <span
+                        className="text-xs text-muted-foreground tabular-nums"
+                        data-testid="qr-size-value"
+                    >
                         {advanced.size}px
                     </span>
                 </div>
@@ -1046,7 +950,10 @@ function AdvancedSection() {
                     <Label className="text-xs text-muted-foreground">
                         Quiet Zone (Margin)
                     </Label>
-                    <span className="text-xs tabular-nums text-muted-foreground" data-testid="qr-margin-value">
+                    <span
+                        className="text-xs text-muted-foreground tabular-nums"
+                        data-testid="qr-margin-value"
+                    >
                         {advanced.margin}px
                     </span>
                 </div>
@@ -1117,40 +1024,38 @@ function PreviewPanel() {
             }
             setIsReady(true)
         } else {
+            setIsReady(false)
             qrInstanceRef.current.update(options)
+            setIsReady(true)
         }
-    }, [
-        qrData,
-        store.style,
-        store.logo,
-        store.advanced,
-    ])
+    }, [qrData, store.style, store.logo, store.advanced])
 
-    const handleDownload = useCallback(
-        (ext: "png" | "jpeg" | "svg") => {
-            if (!qrInstanceRef.current) return
-            qrInstanceRef.current.download({
-                name: "qr-code",
-                extension: ext,
-            })
-            toast.success(
-                `QR code downloaded as ${ext.toUpperCase()}`
-            )
-        },
-        []
-    )
+    const handleDownload = useCallback((ext: "png" | "jpeg" | "svg") => {
+        if (!qrInstanceRef.current) return
+        qrInstanceRef.current.download({
+            name: "qr-code",
+            extension: ext,
+        })
+        toast.success(`QR code downloaded as ${ext.toUpperCase()}`)
+    }, [])
 
     return (
-        <div className="flex w-full flex-col items-center gap-6" data-testid="preview-panel">
+        <div
+            className="flex w-full flex-col items-center gap-6"
+            data-testid="preview-panel"
+        >
             {/* Preview card */}
-            <Card className="flex w-full items-center justify-center overflow-hidden p-8">
+            <Card className="relative flex min-h-72 w-full min-w-72 items-center justify-center overflow-hidden p-8">
                 <div
                     ref={qrRef}
-                    className="flex items-center justify-center [&>canvas]:max-w-full [&>canvas]:h-auto"
+                    className="flex items-center justify-center [&>canvas]:h-auto [&>canvas]:max-w-full"
                     data-testid="qr-canvas-container"
                 />
                 {!isReady && (
-                    <div className="flex size-64 items-center justify-center text-muted-foreground" data-testid="qr-loading-placeholder">
+                    <div
+                        className="absolute top-1/2 left-1/2 flex size-64 -translate-x-1/2 -translate-y-1/2 items-center justify-center text-muted-foreground"
+                        data-testid="qr-loading-placeholder"
+                    >
                         <QrCode className="size-16 animate-pulse opacity-30" />
                     </div>
                 )}
@@ -1164,16 +1069,25 @@ function PreviewPanel() {
                 <div className="flex flex-wrap gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className="w-full gap-2" data-testid="download-image-btn">
+                            <Button
+                                className="w-full gap-2"
+                                data-testid="download-image-btn"
+                            >
                                 <Download className="size-4" />
                                 Download as Image
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
-                            <DropdownMenuItem onClick={() => handleDownload("png")} data-testid="download-png">
+                            <DropdownMenuItem
+                                onClick={() => handleDownload("png")}
+                                data-testid="download-png"
+                            >
                                 PNG
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDownload("jpeg")} data-testid="download-jpeg">
+                            <DropdownMenuItem
+                                onClick={() => handleDownload("jpeg")}
+                                data-testid="download-jpeg"
+                            >
                                 JPEG
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -1191,7 +1105,10 @@ function PreviewPanel() {
             </div>
 
             {/* Info badge */}
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3" data-testid="privacy-badge">
+            <div
+                className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3"
+                data-testid="privacy-badge"
+            >
                 <Badge variant="secondary" className="text-xs">
                     Client-side
                 </Badge>
@@ -1217,7 +1134,10 @@ function ColorPickerField({
     testId?: string
 }) {
     return (
-        <div className="flex items-center gap-3" data-testid={testId ? `color-field-${testId}` : undefined}>
+        <div
+            className="flex items-center gap-3"
+            data-testid={testId ? `color-field-${testId}` : undefined}
+        >
             <div className="relative">
                 <input
                     type="color"
@@ -1228,9 +1148,7 @@ function ColorPickerField({
                 />
             </div>
             <div className="flex flex-col gap-0.5">
-                <Label className="text-xs text-muted-foreground">
-                    {label}
-                </Label>
+                <Label className="text-xs text-muted-foreground">{label}</Label>
                 <Input
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
