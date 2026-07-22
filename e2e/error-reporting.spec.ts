@@ -24,7 +24,7 @@ test.describe("Error Reporting & PostHog Integration", () => {
       await page.goto("/nonexistent-page")
       await waitForAppReady(page)
 
-      const backLink = page.getByRole("link", { name: /Back to tools/i })
+      const backLink = page.getByRole("link", { name: /Back to home/i })
       await expect(backLink).toBeVisible()
 
       await backLink.click()
