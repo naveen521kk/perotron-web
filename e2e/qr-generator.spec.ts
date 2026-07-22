@@ -1,5 +1,7 @@
+import * as os from "os"
 import { test, expect } from "@playwright/test"
 import { navigateToQrGenerator } from "./helpers/navigation"
+import { decodeDownloadedQr } from "./helpers/qr-decode"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -40,7 +42,7 @@ test.describe("QR Code Generator", () => {
       const canonical = page.locator('link[rel="canonical"]')
       await expect(canonical).toHaveAttribute(
         "href",
-        "https://tools.naveenmk.me/qr/generator"
+        "https://tools.naveenmk.me/qr/generator/"
       )
     })
 
@@ -546,3 +548,125 @@ test.describe("QR Code Generator", () => {
   })
 })
 
+// ─────────────────────────────────────────────────────────────────────────────────
+// QR Data Integrity ─ download PNG → decode with jsqr → assert data matches
+// ─────────────────────────────────────────────────────────────────────────────────
+
+test.describe("QR data integrity", () => {
+    // Each test downloads a PNG and verifies the embedded QR string.
+    // WASM + canvas rendering can be slow on CI, so we allow generous timeouts.
+    test.setTimeout(60_000)
+
+    /** Helper: fill URL input, wait for canvas, download PNG, decode, return data. */
+    async function downloadAndDecode(
+      page: Parameters<typeof navigateToQrGenerator>[0]
+    ): Promise<string> {
+      const downloadPromise = page.waitForEvent("download", { timeout: 30_000 })
+      await page.getByTestId("download-image-btn").click()
+      await page.getByTestId("download-png").click()
+      const download = await downloadPromise
+      return decodeDownloadedQr(download, os.tmpdir())
+    }
+
+    test("URL QR encodes the entered website URL", async ({ page }) => {
+      const targetUrl = "https://example.com"
+      await navigateToQrGenerator(page)
+      await page.locator("#qr-url").fill(targetUrl)
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 10_000 })
+
+      const decoded = await downloadAndDecode(page)
+      expect(decoded).toBe(targetUrl)
+    })
+
+    test("Text QR encodes the entered plain text", async ({ page }) => {
+      const text = "Hello, Perotron Web!"
+      await navigateToQrGenerator(page)
+      await page.getByTestId("content-tab-text").click()
+      await page.locator("#qr-text").fill(text)
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 10_000 })
+
+      const decoded = await downloadAndDecode(page)
+      expect(decoded).toBe(text)
+    })
+
+    test("WiFi QR encodes the correct WIFI: URI format", async ({ page }) => {
+      const ssid = "TestNetwork"
+      const password = "s3cretPass"
+      await navigateToQrGenerator(page)
+      await page.getByTestId("content-tab-wifi").click()
+      await page.locator("#wifi-ssid").fill(ssid)
+      await page.locator("#wifi-pass").fill(password)
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 10_000 })
+
+      const decoded = await downloadAndDecode(page)
+      // Expected format: WIFI:T:WPA;S:<ssid>;P:<password>;H:false;;
+      expect(decoded).toContain(`S:${ssid}`)
+      expect(decoded).toContain(`P:${password}`)
+      expect(decoded).toMatch(/^WIFI:/)
+    })
+
+    test("vCard QR encodes the correct vCard 3.0 data", async ({ page }) => {
+      await navigateToQrGenerator(page)
+      await page.getByTestId("content-tab-more").click()
+      await page.getByTestId("content-tab-vcard").click()
+      await page.locator("#vc-first").fill("Jane")
+      await page.locator("#vc-last").fill("Doe")
+      await page.locator("#vc-org").fill("Acme Corp")
+      await page.locator("#vc-phone").fill("+15550001234")
+      await page.locator("#vc-email").fill("jane@example.com")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 10_000 })
+
+      const decoded = await downloadAndDecode(page)
+      expect(decoded).toContain("BEGIN:VCARD")
+      expect(decoded).toContain("VERSION:3.0")
+      expect(decoded).toContain("N:Doe;Jane")
+      expect(decoded).toContain("FN:Jane Doe")
+      expect(decoded).toContain("ORG:Acme Corp")
+      expect(decoded).toContain("TEL:+15550001234")
+      expect(decoded).toContain("EMAIL:jane@example.com")
+      expect(decoded).toContain("END:VCARD")
+    })
+
+    test("WhatsApp QR encodes the correct wa.me URL with message", async ({
+      page,
+    }) => {
+      const phone = "14155550199"
+      const message = "Hello from Perotron!"
+      await navigateToQrGenerator(page)
+      await page.getByTestId("content-tab-more").click()
+      await page.getByTestId("content-tab-whatsapp").click()
+      await page.locator("#wa-phone").fill(phone)
+      await page.locator("#wa-msg").fill(message)
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 10_000 })
+
+      const decoded = await downloadAndDecode(page)
+      expect(decoded).toContain(`https://wa.me/${phone}`)
+      expect(decoded).toContain(encodeURIComponent(message))
+    })
+
+    test("WhatsApp QR without message encodes plain wa.me URL", async ({
+      page,
+    }) => {
+      const phone = "14155550199"
+      await navigateToQrGenerator(page)
+      await page.getByTestId("content-tab-more").click()
+      await page.getByTestId("content-tab-whatsapp").click()
+      await page.locator("#wa-phone").fill(phone)
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 10_000 })
+
+      const decoded = await downloadAndDecode(page)
+      expect(decoded).toBe(`https://wa.me/${phone}`)
+    })
+})
