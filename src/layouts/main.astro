@@ -240,7 +240,10 @@ const {
                 <div
                     class="flex flex-col items-center gap-2 sm:flex-row sm:justify-between"
                 >
-                    <p class="text-xs text-muted-foreground">
+                    <p
+                        class="text-xs text-muted-foreground"
+                        data-testid="footer-copyright"
+                    >
                         &copy; {new Date().getFullYear()}{" "}
                         <a
                             href="https://www.naveenmk.me"
@@ -248,9 +251,9 @@ const {
                             rel="noopener noreferrer"
                             class="transition-colors hover:text-foreground"
                         >
-                            Naveen M K
+                            Naveen M K.
                         </a>
-                        . Licensed under GNU AGPLv3.
+                        Licensed under GNU AGPLv3.
                     </p>
                     <a
                         href="https://github.com/naveen521kk/perotron-web/releases"

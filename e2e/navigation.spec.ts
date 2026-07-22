@@ -116,3 +116,36 @@ test.describe("Navigation & Layout", () => {
     await expect(page).toHaveTitle(/Terms/i)
   })
 })
+
+test.describe("Footer copyright", () => {
+  const pages = [
+    { name: "Home", path: "/" },
+    { name: "PDF category", path: "/pdf" },
+    { name: "PDF Merge", path: "/pdf/merge" },
+    { name: "PDF Split", path: "/pdf/split" },
+    { name: "QR category", path: "/qr" },
+    { name: "QR Generator", path: "/qr/generator" },
+    { name: "Privacy Policy", path: "/privacy" },
+    { name: "Terms of Use", path: "/terms" },
+  ]
+
+  for (const { name, path } of pages) {
+    test(`copyright is present on ${name} page`, async ({ page }) => {
+      await page.goto(path)
+      await waitForAppReady(page)
+
+      const copyright = page.getByTestId("footer-copyright")
+      await expect(copyright).toBeVisible()
+
+      // Should contain the current year
+      const currentYear = new Date().getFullYear().toString()
+      await expect(copyright).toContainText(currentYear)
+
+      // Should credit the author
+      await expect(copyright).toContainText("Naveen M K")
+
+      // Should mention the license
+      await expect(copyright).toContainText("GNU AGPLv3")
+    })
+  }
+})
