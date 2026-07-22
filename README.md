@@ -33,14 +33,14 @@ Perotron uses a two-layer architecture:
 
 ```
 Browser
-├── React SPA (TanStack Router + Shadcn UI)
+├── Astro SSG (Astro + Shadcn UI)
 │   └── Calls ▸ Web Worker
 │                └── Loads Pyodide (Python/WASM runtime)
 │                        └── Imports pyodide-tools (.whl)
 │                                └── Uses pypdf for PDF operations
 ```
 
-1. **Frontend (React + Vite)** — The UI layer. Handles file input, drag-and-drop, previews, and downloads.
+1. **Frontend (Astro)** — The UI layer. Handles file input, drag-and-drop, previews, and downloads.
 2. **Web Worker** — Isolates the heavy Pyodide runtime off the main thread, keeping the UI responsive.
 3. **`pyodide-tools`** — A small Python package (built as a `.whl` wheel) that wraps `pypdf` and exposes clean functions for merging, splitting, and inspecting PDFs. Served as a static asset and loaded at runtime by Pyodide.
 
@@ -50,8 +50,7 @@ Browser
 
 | Layer | Technology |
 |---|---|
-| Framework | React 19 + Vite 8 |
-| Routing | TanStack Router (file-based) |
+| Framework | Astro |
 | UI Components | Shadcn/ui + Tailwind CSS v4 |
 | Python Runtime | Pyodide (WASM) |
 | PDF Processing | `pypdf` via `pyodide-tools` wheel |
@@ -68,23 +67,60 @@ Browser
 ```
 .
 ├── src/
-│   ├── routes/               # TanStack Router file-based routes
-│   │   ├── __root.tsx        # Root layout: nav, footer, global providers
-│   │   ├── index.tsx         # Homepage — tool listing
-│   │   ├── merge.tsx         # PDF Merge tool
-│   │   ├── split.tsx         # PDF Split tool
-│   │   └── qr-generator.tsx  # QR Code Generator tool
-│   ├── components/
-│   │   └── ui/               # Shadcn UI primitives (Button, Card, etc.)
-│   ├── store/                # Zustand state stores (per tool)
+│   ├── pages/                    # Astro file-based routes
+│   │   ├── index.astro           # Homepage — tool listing
+│   │   ├── 404.astro             # 404 error page
+│   │   ├── 500.astro             # 500 error page
+│   │   ├── privacy.astro         # Privacy policy page
+│   │   ├── terms.astro           # Terms of service page
+│   │   ├── pdf/
+│   │   │   ├── index.astro       # PDF category landing page
+│   │   │   ├── merge.astro       # PDF Merge tool page
+│   │   │   └── split.astro       # PDF Split tool page
+│   │   └── qr/
+│   │       ├── index.astro       # QR category landing page
+│   │       └── generator.astro   # QR Code Generator page
+│   ├── layouts/
+│   │   └── main.astro            # Root layout: nav, footer, global providers
+│   ├── components/               # Astro & React components
+│   │   ├── dark-mode.astro
+│   │   ├── external-link.astro
+│   │   ├── logo.astro
+│   │   └── react/                # React island components
+│   │       ├── index-page.tsx    # Homepage tool listing (React)
+│   │       ├── mode-toggle.tsx   # Dark/light mode toggle
+│   │       ├── ad-banner.tsx
+│   │       ├── offline-indicator.tsx
+│   │       ├── providers.tsx
+│   │       └── ui/               # Shadcn UI primitives (Button, Card, etc.)
+│   ├── tools/                    # Tool-specific React components & logic
+│   │   ├── pdf-tools/
+│   │   │   ├── merge.tsx         # PDF Merge React component
+│   │   │   ├── split.tsx         # PDF Split React component
+│   │   │   ├── pdf-worker.ts     # Web Worker bridge to Pyodide
+│   │   │   ├── pdf-thumbnail.tsx
+│   │   │   ├── utils.ts
+│   │   │   └── store/            # Zustand stores for PDF tools
+│   │   │       ├── merge.ts
+│   │   │       └── split.ts
+│   │   └── qr-tools/
+│   │       ├── index.tsx         # QR Code Generator React component
+│   │       ├── store.ts          # Zustand store for QR tool
+│   │       └── constants.tsx
+│   ├── styles/
+│   │   ├── global.css            # Global styles
+│   │   └── typeset.css           # Typography styles
+│   ├── assets/                   # Static assets (logo SVGs, etc.)
 │   └── lib/
-│       └── pdf-worker.ts     # Web Worker bridge to Pyodide
-├── pyodide-tools/            # Python package built into a .whl for Pyodide
+│       ├── posthog.ts            # Analytics integration
+│       └── utils.ts              # Shared utility functions
+├── pyodide-tools/                # Python package built into a .whl for Pyodide
 │   └── src/pyodide_tools/
-│       └── pdf.py            # merge, split, and page-extraction functions
-├── public/                   # Static assets (Pyodide .whl served from here)
-├── justfile                  # Build automation (build, clean, etc.)
-└── vite.config.ts
+│       └── pdf.py                # merge, split, and page-extraction functions
+├── public/                       # Static assets (Pyodide .whl served from here)
+├── e2e/                          # Playwright end-to-end tests
+├── justfile                      # Build automation (build, clean, etc.)
+└── astro.config.mjs
 ```
 
 ---
