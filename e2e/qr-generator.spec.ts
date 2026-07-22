@@ -359,13 +359,14 @@ test.describe("QR Code Generator", () => {
 
       const grid = page.getByTestId("example-logos")
       await expect(grid).toBeVisible()
-      await expect(grid.locator("button")).toHaveCount(6)
+      await expect(grid.locator("button")).toHaveCount(7)
     })
 
     test("each example logo button is visible by testid", async ({ page }) => {
       await navigateToQrGenerator(page)
 
       for (const name of [
+        "perotron",
         "github",
         "x",
         "linkedin",
@@ -444,21 +445,21 @@ test.describe("QR Code Generator", () => {
       }
     })
 
-    test("default error correction level is M", async ({ page }) => {
+    test("default error correction level is H", async ({ page }) => {
       await navigateToQrGenerator(page)
 
-      await expect(page.locator("#ec-M")).toBeChecked()
+      await expect(page.locator("#ec-H")).toBeChecked()
     })
 
-    test("clicking H sets error correction to H and deselects M", async ({
+    test("clicking H sets error correction to M and deselects H", async ({
       page,
     }) => {
       await navigateToQrGenerator(page)
 
-      await page.getByTestId("ec-label-H").click()
+      await page.getByTestId("ec-label-M").click()
 
-      await expect(page.locator("#ec-H")).toBeChecked()
-      await expect(page.locator("#ec-M")).not.toBeChecked()
+      await expect(page.locator("#ec-M")).toBeChecked()
+      await expect(page.locator("#ec-H")).not.toBeChecked()
     })
 
     test("QR size value label is visible with px suffix", async ({ page }) => {
