@@ -84,7 +84,8 @@ test.describe("Navigation & Layout", () => {
     await themeToggle.click()
     await page.getByRole("menuitem", { name: /Light/i }).click()
 
-    await expect(html).toHaveClass(/light/)
+    // Light mode removes the "dark" class; no "light" class is added
+    await expect(html).not.toHaveClass(/dark/)
   })
 
   test("PDF category page lists available PDF tools", async ({ page }) => {
