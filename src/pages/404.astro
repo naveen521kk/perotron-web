@@ -1,0 +1,25 @@
+---
+import Layout from "@/layouts/main.astro"
+
+const pathname = Astro.url.pathname
+---
+
+<Layout>
+    <main
+        class="container mx-auto p-4 pt-16 text-center"
+        data-pathname={pathname}
+    >
+        <h1 class="mb-4 text-4xl font-bold">404</h1>
+        <p class="text-muted-foreground">That page doesn't exist.</p>
+        <a href="/" class="mt-8 inline-block text-primary hover:underline">
+            Back to home
+        </a>
+    </main>
+    <script>
+        import { reportPageNotFound } from "@/lib/posthog.ts"
+        const pathname =
+            document.querySelector("main")?.getAttribute("data-pathname") ||
+            window.location.pathname
+        reportPageNotFound(pathname)
+    </script>
+</Layout>

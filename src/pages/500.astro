@@ -1,0 +1,28 @@
+---
+import Layout from "@/layouts/main.astro"
+---
+
+<Layout>
+    <main
+        class="container mx-auto flex min-h-[60vh] flex-col items-center justify-center px-4 py-20 text-center"
+    >
+        <p
+            class="mb-3 text-sm font-semibold tracking-[0.2em] text-primary uppercase"
+        >
+            Server error
+        </p>
+        <h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+            Something went wrong
+        </h1>
+        <p class="mb-8 max-w-xl text-base text-muted-foreground sm:text-lg">
+            The server hit an unexpected problem while rendering this page.
+            Please try again in a moment.
+        </p>
+        <a
+            href="/"
+            class="rounded-sm bg-gray-600 px-4 py-2 font-extrabold text-white uppercase transition hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-800"
+        >
+            Return home
+        </a>
+    </main>
+</Layout>

@@ -1,0 +1,12 @@
+---
+import Layout from "@/layouts/main.astro"
+import { SplitPage } from "@/tools/pdf-tools/split"
+
+const title = "Split PDF — Extract Pages from PDF Free | Perotron Web"
+const description =
+    "Extract individual pages or split a large PDF into separate files — no uploads required. Your PDF stays in your browser and is never sent to a server.."
+---
+
+<Layout title={title} description={description}>
+    <SplitPage client:load />
+</Layout>

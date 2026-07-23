@@ -1,0 +1,273 @@
+---
+import "@/styles/global.css"
+
+import DarkMode from "@/components/dark-mode.astro"
+import Logo from "@/components/logo.astro"
+
+import { Separator } from "@/components/react/ui/separator"
+import { ModeToggle } from "@/components/react/mode-toggle"
+import { buttonVariants } from "@/components/react/ui/button"
+import { Toaster } from "@/components/react/ui/sonner"
+import { OfflineIndicator } from "@/components/react/offline-indicator"
+
+import { cn } from "@/lib/utils"
+
+import { SiGithub } from "@icons-pack/react-simple-icons"
+
+const SITE_TITLE = "Perotron Web — Privacy-first tools powered by WebAssembly"
+const SITE_DESCRIPTION =
+    "Free, open-source privacy-first tools powered by WebAssembly. Merge PDFs, split PDFs, generate QR codes, and more — all inside your browser. No uploads, no accounts, no data sent to any server. Open source & free forever."
+const SITE_URL = Astro.site
+const SITE_IMAGE = "/banner.png"
+const finalUrl = new URL(Astro.url.pathname, SITE_URL)
+
+interface Props {
+    title?: string
+    description?: string
+    image?: string
+}
+
+const {
+    title = SITE_TITLE,
+    description = SITE_DESCRIPTION,
+    image = SITE_IMAGE,
+} = Astro.props
+---
+
+<html lang="en">
+    <head>
+        <DarkMode />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="title" content={title} />
+        <meta name="description" content={description} />
+        <meta name="image" content={image} />
+        <meta name="og:image" content={image} />
+        <meta name="og:title" content={title} />
+        <meta name="og:description" content={description} />
+        <meta name="og:type" content="website" />
+        <meta name="og:url" content={finalUrl} />
+        <meta name="twitter:image" content={image} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={finalUrl} />
+        <meta name="apple-mobile-web-app-title" content="Perotron Web" />
+        <title>{title}</title>
+        <link
+            rel="icon"
+            type="image/png"
+            href="/favicon-96x96.png"
+            sizes="96x96"
+        />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" type="image/ico" href="/favicon.ico" />
+        <link
+            rel="icon"
+            type="image/png"
+            href="/apple-touch-icon.png"
+            sizes="180x180"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="canonical" href={finalUrl} />
+        <link rel="sitemap" href="/sitemap-index.xml" />
+        {
+            import.meta.env.PROD && (
+                <>
+                    <script
+                        async
+                        src="https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG"
+                    />
+                    <script
+                        async
+                        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7183740147103241"
+                        crossorigin="anonymous"
+                    />
+                </>
+            )
+        }
+        {
+            import.meta.env.PROD && (
+                <script
+                    is:inline
+                    set:html={`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-F61KVD3XWG');`}
+                />
+            )
+        }
+    </head>
+    <body
+        class="google-anno-skip flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20"
+    >
+        <script>
+            import { initPostHog } from "@/lib/posthog"
+            initPostHog()
+        </script>
+        <header
+            class="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl"
+        >
+            <div
+                class="container mx-auto flex h-14 items-center gap-6 px-4 md:px-6"
+            >
+                <a
+                    href="/"
+                    class="flex shrink-0 items-center gap-2 text-base font-semibold transition-opacity hover:opacity-80"
+                >
+                    <Logo />
+                    <span class="tracking-tight">Perotron Web</span>
+                </a>
+
+                <Separator
+                    orientation="vertical"
+                    className="my-auto hidden h-7 md:block"
+                />
+
+                <nav class="hidden items-center gap-5 md:flex">
+                    <a
+                        href="/pdf"
+                        class="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
+                    >
+                        PDF Tools
+                    </a>
+                    <a
+                        href="/qr"
+                        class="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
+                    >
+                        QR Tools
+                    </a>
+                </nav>
+
+                <div class="ml-auto flex items-center gap-2">
+                    <ModeToggle client:load />
+                    <a
+                        href="https://github.com/naveen521kk/perotron-web"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class={cn(
+                            buttonVariants({
+                                variant: "ghost",
+                                size: "sm",
+                            }),
+                            "flex items-center justify-center gap-2 text-center text-xs"
+                        )}
+                        aria-label="View source on GitHub"
+                    >
+                        <SiGithub className="size-5" title="Open Github" />
+                    </a>
+                </div>
+            </div>
+        </header>
+        <main class="flex flex-1 flex-col">
+            <slot />
+        </main>
+        <footer class="mt-auto border-t border-border bg-muted/40">
+            <div
+                class="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-2 md:px-6 lg:grid-cols-4"
+            >
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-2">
+                        <Logo />
+                        <span class="font-semibold text-foreground">
+                            Perotron Web
+                        </span>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        Compute locally. Work privately.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h4 class="font-medium text-foreground">
+                        Project & Platform
+                    </h4>
+                    <nav
+                        class="flex flex-col gap-2 text-sm text-muted-foreground"
+                    >
+                        <a
+                            href="/#tools"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            Tools
+                        </a>
+                        {
+                            /* <Link to="/" class="hover:text-foreground transition-colors">Documentation</Link> */
+                        }
+                        <a
+                            href="https://github.com/naveen521kk/perotron-web"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            GitHub
+                        </a>
+                        <a
+                            href="https://github.com/naveen521kk/perotron-web/blob/main/CHANGELOG.md"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            Changelog
+                        </a>
+                    </nav>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h4 class="font-medium text-foreground">Legal</h4>
+                    <nav
+                        class="flex flex-col gap-2 text-sm text-muted-foreground"
+                    >
+                        <a
+                            href="/privacy"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            Privacy Policy
+                        </a>
+                        <a
+                            href="/terms"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            Terms of Use
+                        </a>
+                        <a
+                            href="https://github.com/naveen521kk/perotron-web/blob/main/LICENSE"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            License
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            <div
+                class="container mx-auto border-t border-border/50 px-4 py-6 md:px-6"
+            >
+                <div
+                    class="flex flex-col items-center gap-2 sm:flex-row sm:justify-between"
+                >
+                    <p
+                        class="text-xs text-muted-foreground"
+                        data-testid="footer-copyright"
+                    >
+                        &copy; {new Date().getFullYear()}{" "}
+                        <a
+                            href="https://www.naveenmk.me"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="transition-colors hover:text-foreground"
+                        >
+                            Naveen M K.
+                        </a>
+                        Licensed under GNU AGPLv3.
+                    </p>
+                    <a
+                        href="https://github.com/naveen521kk/perotron-web/releases"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-mono text-xs text-muted-foreground/60 transition-colors hover:text-muted-foreground"
+                        aria-label={`Version ${__APP_VERSION__} — view changelog`}
+                    >
+                        v{__APP_VERSION__}
+                    </a>
+                </div>
+            </div>
+        </footer>
+        <Toaster richColors closeButton client:load />
+        <OfflineIndicator client:load />
+    </body>
+</html>

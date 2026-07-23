@@ -61,7 +61,7 @@ test.describe("Navigation & Layout", () => {
 
     const versionLink = page.locator("footer a[aria-label*='Version']")
     await expect(versionLink).toBeVisible()
-    await expect(versionLink).toHaveText(/^v\d+\.\d+\.\d+$/)
+    await expect(versionLink).toHaveText(/^\s*v\d+\.\d+\.\d+\s*$/)
   })
 
   test("theme toggle switches between light and dark mode", async ({ page }) => {
@@ -84,7 +84,8 @@ test.describe("Navigation & Layout", () => {
     await themeToggle.click()
     await page.getByRole("menuitem", { name: /Light/i }).click()
 
-    await expect(html).toHaveClass(/light/)
+    // Light mode removes the "dark" class; no "light" class is added
+    await expect(html).not.toHaveClass(/dark/)
   })
 
   test("PDF category page lists available PDF tools", async ({ page }) => {
@@ -115,4 +116,37 @@ test.describe("Navigation & Layout", () => {
 
     await expect(page).toHaveTitle(/Terms/i)
   })
+})
+
+test.describe("Footer copyright", () => {
+  const pages = [
+    { name: "Home", path: "/" },
+    { name: "PDF category", path: "/pdf" },
+    { name: "PDF Merge", path: "/pdf/merge" },
+    { name: "PDF Split", path: "/pdf/split" },
+    { name: "QR category", path: "/qr" },
+    { name: "QR Generator", path: "/qr/generator" },
+    { name: "Privacy Policy", path: "/privacy" },
+    { name: "Terms of Use", path: "/terms" },
+  ]
+
+  for (const { name, path } of pages) {
+    test(`copyright is present on ${name} page`, async ({ page }) => {
+      await page.goto(path)
+      await waitForAppReady(page)
+
+      const copyright = page.getByTestId("footer-copyright")
+      await expect(copyright).toBeVisible()
+
+      // Should contain the current year
+      const currentYear = new Date().getFullYear().toString()
+      await expect(copyright).toContainText(currentYear)
+
+      // Should credit the author
+      await expect(copyright).toContainText("Naveen M K")
+
+      // Should mention the license
+      await expect(copyright).toContainText("GNU AGPLv3")
+    })
+  }
 })

@@ -1,0 +1,12 @@
+---
+import Layout from "@/layouts/main.astro"
+import { QrGeneratorPage } from "@/tools/qr-tools"
+
+const title = "QR Code Generator — Create Custom QR Codes | Perotron Web"
+const description =
+    "Generate free, custom QR codes for URLs, WiFi, vCards, WhatsApp, and plain text. Style with custom colors, dot shapes, and logos. Download as JPEG, PNG or SVG — all in your browser."
+---
+
+<Layout title={title} description={description}>
+    <QrGeneratorPage client:load />
+</Layout>

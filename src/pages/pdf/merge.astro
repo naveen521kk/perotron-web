@@ -1,0 +1,12 @@
+---
+import Layout from "@/layouts/main.astro"
+import { MergePage } from "@/tools/pdf-tools/merge"
+
+const title = "Merge PDF — Combine PDFs Free Online | Perotron Web"
+const description =
+    "Combine multiple PDF files into one document instantly. Arrange pages in any order and download the merged PDF — everything stays in your browser, nothing is uploaded."
+---
+
+<Layout title={title} description={description}>
+    <MergePage client:load />
+</Layout>

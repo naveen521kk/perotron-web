@@ -60,7 +60,7 @@ export default defineConfig({
 
   /* Build the app and start a preview server before tests */
   webServer: {
-    command: "pnpm exec vite preview --port 4173",
+    command: "pnpm exec astro preview --port 4173",
     port: 4173,
     reuseExistingServer: !process.env.CI,
     /* The preview server starts fast since the build is already done */
