@@ -18,6 +18,9 @@
     "typecheck": "astro check",
     "deploy": "pnpm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
+    "unit": "vitest run",
+    "unit:watch": "vitest",
+    "unit:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:headed": "playwright test --headed",
@@ -63,17 +66,20 @@
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.7.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "happy-dom": "^20.11.1",
     "jsqr": "^1.4.0",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.0",
-    "wrangler": "4.114.0"
+    "vitest": "^4.1.10",
+    "wrangler": "4.113.0"
   },
   "packageManager": "pnpm@11.13.1"
 }
