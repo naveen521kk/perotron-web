@@ -70,3 +70,20 @@ E2E tests are written using **Playwright** and live in the `e2e/` directory at t
 - **`data-testid` attributes:** When a test needs to target a specific UI element, add a `data-testid` attribute to the component in the source code rather than relying on fragile CSS selectors or text matching alone.
 - **Timeouts:** WASM/PyOdide operations can be slow. Set `test.setTimeout(120_000)` on any test that waits for file processing to complete, and use `{ timeout: 60_000 }` on the relevant `expect` assertions.
 - **Running tests:** Use `pnpm run e2e` for headless runs or `pnpm run e2e:ui` for the interactive Playwright UI.
+
+## Unit Testing Guidelines
+Unit tests are written using **Vitest** and co-located alongside source files as `*.test.ts` / `*.test.tsx` files.
+
+- **Framework:** [Vitest](https://vitest.dev/) with `happy-dom` environment. Config lives in `vitest.config.ts`.
+- **Scope:** Unit tests cover pure logic — utility functions, Zustand store actions, and data-transformation helpers. They do **not** cover React components (use E2E for those) or the Pyodide worker (requires a real browser runtime).
+- **Co-location:** Place test files next to the source file they cover:
+  - `src/lib/utils.ts` → `src/lib/utils.test.ts`
+  - `src/tools/pdf-tools/utils.ts` → `src/tools/pdf-tools/utils.test.ts`
+  - `src/tools/pdf-tools/store/merge.ts` → `src/tools/pdf-tools/store/merge.test.ts`
+- **Store isolation:** Always call `store.getState().reset()` or `store.getState().clear()` inside a `beforeEach` to prevent cross-test state pollution.
+- **Mandatory coverage:** Every new utility function or store action **must** be accompanied by unit tests covering happy paths and all significant edge cases (null inputs, boundary values, invalid inputs, etc.).
+- **Running tests:**
+  - `pnpm run unit` — single run (CI mode)
+  - `pnpm run unit:watch` — interactive watch mode during development
+  - `pnpm run unit:coverage` — run with V8 coverage report (outputs to `coverage/`)
+- **CI:** The `.github/workflows/unit.yml` workflow runs `pnpm run unit:coverage` on every push/PR to `main` and uploads the coverage report as an artifact.

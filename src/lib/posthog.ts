@@ -34,6 +34,13 @@ class PostHogClient {
             return
         }
 
+        if (import.meta.env.PUBLIC_E2E_TEST) {
+            console.info(
+                "[PostHog] e2e mode: events will be logged to console only"
+            )
+            return
+        }
+
         if (this.initialized || posthog.__loaded) {
             this.instance = window.__posthog ?? this.instance
             return
@@ -63,6 +70,14 @@ class PostHogClient {
     ) {
         if (import.meta.env.DEV) {
             console.info("[PostHog]", event, { params, options })
+        }
+        if (import.meta.env.PUBLIC_E2E_TEST) {
+            // Emit a structured log line that Playwright can intercept via
+            // page.on('console'). Format: [PostHog:E2E] <JSON>
+            console.log(
+                "[PostHog:E2E]",
+                JSON.stringify({ event, params: params ?? null })
+            )
         }
     }
 

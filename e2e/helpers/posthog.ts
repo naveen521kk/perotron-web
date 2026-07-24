@@ -2,22 +2,64 @@ import type { Page } from "@playwright/test"
 import { expect } from "@playwright/test"
 
 /**
- * Represents a single captured PostHog event extracted from an intercepted
- * network request.
+ * Represents a single captured PostHog event extracted from a console message
+ * (E2E mode) or an intercepted network request (legacy).
  */
 export interface CapturedPostHogEvent {
   event: string
   properties: Record<string, unknown>
 }
 
+// ---------------------------------------------------------------------------
+// Console-based helpers (preferred — works with PUBLIC_E2E_TEST=true)
+// ---------------------------------------------------------------------------
+
+/**
+ * Start collecting PostHog events that posthog.ts emits to the console when
+ * `PUBLIC_E2E_TEST=true` is baked into the build.
+ *
+ * Each event is logged as:
+ *   [PostHog:E2E] {"event":"<name>","params":{...}}
+ *
+ * Call this BEFORE navigating to the page so no events are missed.
+ * Returns a mutable array that accumulates events as the page runs.
+ */
+export function collectPostHogConsoleEvents(page: Page): CapturedPostHogEvent[] {
+  const events: CapturedPostHogEvent[] = []
+
+  page.on("console", (msg) => {
+    const text = msg.text()
+    if (!text.startsWith("[PostHog:E2E]")) return
+
+    try {
+      const json = text.slice("[PostHog:E2E]".length).trim()
+      const parsed = JSON.parse(json) as {
+        event: string
+        params: Record<string, unknown> | null
+      }
+      events.push({
+        event: parsed.event,
+        properties: parsed.params ?? {},
+      })
+    } catch {
+      // Ignore malformed log lines
+    }
+  })
+
+  return events
+}
+
+// ---------------------------------------------------------------------------
+// Network-interception helpers (legacy — kept for reference)
+// ---------------------------------------------------------------------------
+
 /**
  * Set up network interception to capture outgoing PostHog events.
  *
- * Intercepts requests to any PostHog ingest endpoint (posthog.com or custom
- * proxy host) and extracts event payloads. Returns a mutable array that
- * accumulates events as the page runs.
- *
- * The requests are fulfilled with a 200 response so the app doesn't retry.
+ * @deprecated Prefer {@link collectPostHogConsoleEvents} when the app is built
+ * with `PUBLIC_E2E_TEST=true` (the default in `playwright.config.ts`).
+ * This helper is only useful if you need to test against a production build
+ * without the E2E flag.
  */
 export async function interceptPostHogEvents(
   page: Page
@@ -84,6 +126,10 @@ export async function interceptPostHogEvents(
 
   return events
 }
+
+// ---------------------------------------------------------------------------
+// Assertion helpers (shared)
+// ---------------------------------------------------------------------------
 
 /**
  * Assert that a PostHog event with the given name was captured.
