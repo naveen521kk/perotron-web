@@ -20,7 +20,10 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
     }, [error])
 
     return (
-        <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-6 p-4">
+        <div
+            className="flex min-w-0 flex-1 flex-col items-center justify-center gap-6 p-4"
+            data-testid="error-boundary-fallback"
+        >
             <div className="text-center">
                 <h2 className="text-lg font-semibold">Something went wrong</h2>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
