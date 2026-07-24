@@ -58,12 +58,29 @@ export default defineConfig({
     },
   ],
 
-  /* Build the app and start a preview server before tests */
+  /**
+   * Build the app with E2E flags and start a preview server before tests.
+   *
+   * PUBLIC_E2E_TEST=true is baked into the static bundle at build time,
+   * switching PostHog into console-logging mode so Playwright can intercept
+   * events without needing real API credentials or network interception.
+   *
+   * NOTE: reuseExistingServer is true locally, so if port 4173 is already up
+   * (from a previous `pnpm run build && pnpm exec astro preview`) the build
+   * command is skipped. Kill the existing server if you need the E2E flag
+   * to be freshly baked in.
+   */
   webServer: {
-    command: "pnpm exec astro preview --port 4173",
+    command: "pnpm exec astro build && pnpm exec astro preview --port 4173",
     port: 4173,
     reuseExistingServer: !process.env.CI,
-    /* The preview server starts fast since the build is already done */
-    timeout: 30_000,
+    /* Allow time for the Astro build + preview server startup */
+    timeout: 120_000,
+    env: {
+      // Baked into the static bundle at build time — switches posthog.ts into
+      // E2E mode where events are emitted as structured console.log lines
+      // (prefix: "[PostHog:E2E]") instead of being sent to the network.
+      PUBLIC_E2E_TEST: "true",
+    },
   },
 })

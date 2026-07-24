@@ -70,7 +70,7 @@ jobs:
         env:
           PUBLIC_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
           PUBLIC_POSTHOG_PROJECT_TOKEN: ${{ secrets.VITE_POSTHOG_PROJECT_TOKEN }}
-        run: just build
+        run: just build-pyodide
 
       - name: Run E2E tests (${{ matrix.browser }})
         run: pnpm exec playwright test --project=${{ matrix.browser }}
