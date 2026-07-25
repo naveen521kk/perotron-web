@@ -6,7 +6,7 @@ import { expect } from "@playwright/test"
  * Looks for the header with the "Perotron Web" brand text.
  */
 export async function waitForAppReady(page: Page) {
-  await page.waitForLoadState("load")
+  await page.waitForLoadState("networkidle")
   await expect(page.locator("header")).toBeVisible()
 }
 
@@ -20,12 +20,14 @@ export async function navigateToHome(page: Page) {
 export async function navigateToPdfMerge(page: Page) {
   await page.goto("/pdf/merge")
   await waitForAppReady(page)
+  await expect(page.getByTestId("merge-file-dropzone")).toBeEnabled()
 }
 
 /** Navigate to the PDF Split tool page. */
 export async function navigateToPdfSplit(page: Page) {
   await page.goto("/pdf/split")
   await waitForAppReady(page)
+  await expect(page.getByTestId("split-file-dropzone")).toBeEnabled()
 }
 
 /** Navigate to the QR Code Generator page. */

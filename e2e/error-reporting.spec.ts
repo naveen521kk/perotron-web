@@ -72,6 +72,8 @@ test.describe("Error Reporting & PostHog Integration", () => {
       await page.goto("/pdf/merge")
       await waitForAppReady(page)
 
+      await expect(page.getByTestId("merge-file-dropzone")).toBeEnabled()
+
       // Trigger the error boundary via the E2E keyboard shortcut.
       await triggerErrorBoundary(page)
 
@@ -99,6 +101,8 @@ test.describe("Error Reporting & PostHog Integration", () => {
       await page.goto("/qr/generator")
       await waitForAppReady(page)
 
+      await expect(page.getByTestId("qr-canvas-container")).toBeVisible()
+
       await triggerErrorBoundary(page)
 
       const fallback = page.getByTestId("error-boundary-fallback")
@@ -119,6 +123,8 @@ test.describe("Error Reporting & PostHog Integration", () => {
       // The error boundary wraps React islands — use a page that renders one.
       await page.goto("/pdf/merge")
       await waitForAppReady(page)
+
+      await expect(page.getByTestId("merge-file-dropzone")).toBeEnabled()
 
       await triggerErrorBoundary(page)
 

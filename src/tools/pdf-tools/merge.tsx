@@ -394,6 +394,7 @@ function MergePageContent() {
                             htmlFor="merge-file-upload"
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={handleInitialDrop}
+                            data-testid="merge-file-dropzone"
                             className="group relative flex h-80 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card transition-all duration-300 hover:border-primary/50 hover:bg-accent/30"
                         >
                             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

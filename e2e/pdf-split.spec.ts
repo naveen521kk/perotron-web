@@ -639,5 +639,71 @@ test.describe("PDF Split Tool", () => {
           .filter({ hasText: /range|valid/i })
       ).toBeVisible({ timeout: 10_000 })
     })
+
+    test("records PostHog error log and exception on PDF read failure", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      const events = collectPostHogConsoleEvents(page)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_CORRUPTED)
+
+      await expect(
+        page.locator("[data-sonner-toast]").filter({ hasText: "Failed to read PDF" })
+      ).toBeVisible({ timeout: 60_000 })
+
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "log", {
+        level: "error",
+        body: "An error occured while reading pdf",
+      })
+      expectPostHogEvent(events, "captureException")
+
+      const exceptionEvt = events.find((e) => e.event === "captureException")
+      expect(exceptionEvt).toBeDefined()
+      expect(exceptionEvt?.properties.context).toHaveProperty("msg")
+    })
+
+    test("records PostHog error log and exception on PDF split failure", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+      await uploadAndWaitForInfo(page, PDF_3PAGE)
+
+      const events = collectPostHogConsoleEvents(page)
+
+      await page.getByTestId("split-tab-pages").click()
+      await page.getByTestId("page-spec-input").fill("999")
+
+      await page.getByTestId("split-btn").click()
+
+      await expect(
+        page.locator("[data-sonner-toast]").filter({ hasText: "Split failed" })
+      ).toBeVisible({ timeout: 60_000 })
+
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "log", {
+        level: "error",
+        body: "An error occured while splitting pdf",
+      })
+      expectPostHogEvent(events, "captureException")
+
+      const exceptionEvt = events.find(
+        (e) =>
+          e.event === "captureException" &&
+          (e.properties.context as { msg?: string })?.msg !== undefined
+      )
+      expect(exceptionEvt).toBeDefined()
+    })
   })
 })

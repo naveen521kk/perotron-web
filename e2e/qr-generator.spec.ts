@@ -2,6 +2,10 @@ import * as os from "os"
 import { test, expect } from "@playwright/test"
 import { navigateToQrGenerator } from "./helpers/navigation"
 import { decodeDownloadedQr } from "./helpers/qr-decode"
+import {
+  collectPostHogConsoleEvents,
+  expectPostHogEvent,
+} from "./helpers/posthog"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -669,4 +673,247 @@ test.describe("QR data integrity", () => {
       const decoded = await downloadAndDecode(page)
       expect(decoded).toBe(`https://wa.me/${phone}`)
     })
+})
+
+test.describe("Analytics telemetry", () => {
+  // ─── qr_code_generated ──────────────────────────────────────────────────────
+
+  test.describe("qr_code_generated event", () => {
+    test("fires qr_code_generated when URL input is filled", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.locator("#qr-url").fill("https://example.com")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      // Wait for the debounce (800 ms) to fire plus a small buffer
+      await page.waitForTimeout(1_200)
+
+      expectPostHogEvent(events, "qr_code_generated", {
+        content_type: "url",
+      })
+    })
+
+    test("qr_code_generated carries correct content_type for text QR", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-text").click()
+      await page.locator("#qr-text").fill("Hello, Perotron Web!")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      await page.waitForTimeout(1_200)
+
+      expectPostHogEvent(events, "qr_code_generated", {
+        content_type: "text",
+      })
+    })
+
+    test("qr_code_generated carries correct content_type for wifi QR", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-wifi").click()
+      await page.locator("#wifi-ssid").fill("MyTestNet")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      await page.waitForTimeout(1_200)
+
+      expectPostHogEvent(events, "qr_code_generated", {
+        content_type: "wifi",
+      })
+    })
+
+    test("qr_code_generated includes expected property keys", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.locator("#qr-url").fill("https://example.com")
+      await page.waitForTimeout(1_200)
+
+      const generated = events.filter((e) => e.event === "qr_code_generated")
+      expect(generated.length).toBeGreaterThan(0)
+      const props = generated[0].properties
+      expect(props).toHaveProperty("content_type")
+      expect(props).toHaveProperty("size")
+      expect(props).toHaveProperty("error_correction")
+      expect(props).toHaveProperty("has_logo")
+      expect(props).toHaveProperty("dot_type")
+    })
+  })
+
+  // ─── qr_content_type_changed ────────────────────────────────────────────────
+
+  test.describe("qr_content_type_changed event", () => {
+    test("fires qr_content_type_changed when switching to Text tab", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-text").click()
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_content_type_changed", {
+        content_type: "text",
+      })
+    })
+
+    test("fires qr_content_type_changed when switching to WiFi tab", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-wifi").click()
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_content_type_changed", {
+        content_type: "wifi",
+      })
+    })
+
+    test("fires qr_content_type_changed when switching to vCard via More dropdown", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-more").click()
+      await page.getByTestId("content-tab-vcard").click()
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_content_type_changed", {
+        content_type: "vcard",
+      })
+    })
+
+    test("fires qr_content_type_changed when switching to WhatsApp via More dropdown", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-more").click()
+      await page.getByTestId("content-tab-whatsapp").click()
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_content_type_changed", {
+        content_type: "whatsapp",
+      })
+    })
+  })
+
+  // ─── qr_code_downloaded ─────────────────────────────────────────────────────
+
+  test.describe("qr_code_downloaded event", () => {
+    test("fires qr_code_downloaded with format=png on PNG download", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.locator("#qr-url").fill("https://example.com")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      const downloadPromise = page.waitForEvent("download", { timeout: 10_000 })
+      await page.getByTestId("download-image-btn").click()
+      await page.getByTestId("download-png").click()
+      await downloadPromise
+
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_code_downloaded", {
+        format: "png",
+        content_type: "url",
+      })
+    })
+
+    test("fires qr_code_downloaded with format=jpeg on JPEG download", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.locator("#qr-url").fill("https://example.com")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      const downloadPromise = page.waitForEvent("download", { timeout: 10_000 })
+      await page.getByTestId("download-image-btn").click()
+      await page.getByTestId("download-jpeg").click()
+      await downloadPromise
+
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_code_downloaded", {
+        format: "jpeg",
+        content_type: "url",
+      })
+    })
+
+    test("fires qr_code_downloaded with format=svg on SVG download", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.locator("#qr-url").fill("https://example.com")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      const downloadPromise = page.waitForEvent("download", { timeout: 10_000 })
+      await page.getByTestId("download-svg-btn").click()
+      await downloadPromise
+
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_code_downloaded", {
+        format: "svg",
+        content_type: "url",
+      })
+    })
+
+    test("qr_code_downloaded carries correct content_type when downloading a text QR", async ({
+      page,
+    }) => {
+      const events = collectPostHogConsoleEvents(page)
+      await navigateToQrGenerator(page)
+
+      await page.getByTestId("content-tab-text").click()
+      await page.locator("#qr-text").fill("Hello, analytics!")
+      await expect(
+        page.getByTestId("qr-canvas-container").locator("canvas")
+      ).toBeVisible({ timeout: 5_000 })
+
+      const downloadPromise = page.waitForEvent("download", { timeout: 10_000 })
+      await page.getByTestId("download-svg-btn").click()
+      await downloadPromise
+
+      await page.waitForTimeout(200)
+
+      expectPostHogEvent(events, "qr_code_downloaded", {
+        format: "svg",
+        content_type: "text",
+      })
+    })
+  })
 })
