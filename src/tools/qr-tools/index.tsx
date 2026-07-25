@@ -1029,7 +1029,9 @@ function PreviewPanel() {
                 margin: store.logo.logoMargin,
                 crossOrigin: "anonymous" as const,
             },
-            ...(store.logo.logoSrc ? { image: store.logo.logoSrc } : {}),
+            ...(store.logo.logoSrc
+                ? { image: store.logo.logoSrc }
+                : { image: "" }),
         }
 
         if (!qrInstanceRef.current) {
