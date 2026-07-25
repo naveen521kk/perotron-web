@@ -201,6 +201,10 @@ get_pdf_info(bytes(pdf_buffer))
     const numPages = info.num_pages ?? 0
     log(`[get-info:${id}] PDF has ${numPages} pages`)
 
+    postAnalytics("get_pdf_info_complete", {
+        num_pages: numPages,
+    })
+
     const response: WorkerResponse = { type: "done-info", id, numPages }
     self.postMessage(response)
 }
