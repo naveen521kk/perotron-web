@@ -70,7 +70,7 @@ const {
         <link rel="canonical" href={finalUrl} />
         <link rel="sitemap" href="/sitemap-index.xml" />
         {
-            import.meta.env.PROD && (
+            import.meta.env.PROD && !import.meta.env.PUBLIC_E2E_TEST && (
                 <>
                     <script
                         async
@@ -85,7 +85,7 @@ const {
             )
         }
         {
-            import.meta.env.PROD && (
+            import.meta.env.PROD && !import.meta.env.PUBLIC_E2E_TEST && (
                 <script
                     is:inline
                     set:html={`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-F61KVD3XWG');`}
