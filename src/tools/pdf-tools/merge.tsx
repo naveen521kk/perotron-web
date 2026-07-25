@@ -190,7 +190,7 @@ function MergePageContent() {
         let cleanupAnalytics: (() => void) | null = null
         try {
             worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
-                    type: "module",
+                type: "module",
             })
             workerRef.current = worker
             // Forward analytics events posted from the worker to all providers
@@ -334,6 +334,13 @@ function MergePageContent() {
             setTimeout(() => setMergeStatus("idle"), 3000)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err)
+            logger.error("An error occured while merging files", {
+                error: msg,
+            })
+            trackException(err as Error, {
+                total_files: files.length,
+                msg: msg,
+            })
             setMergeStatus("error")
             toast.error("Merge failed", { description: msg })
             setTimeout(() => setMergeStatus("idle"), 3000)

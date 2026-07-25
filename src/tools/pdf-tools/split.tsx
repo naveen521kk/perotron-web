@@ -166,6 +166,12 @@ function SplitPageContent() {
                 )
             } catch (err: unknown) {
                 const msg = err instanceof Error ? err.message : String(err)
+                logger.error("An error occured while reading pdf", {
+                    error: msg,
+                })
+                trackException(err as Error, {
+                    msg,
+                })
                 setSplitStatus("error")
                 toast.error("Failed to read PDF", { description: msg })
                 setTimeout(() => setSplitStatus("idle"), 3000)
@@ -310,6 +316,12 @@ function SplitPageContent() {
             setTimeout(() => setSplitStatus("idle"), 3000)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err)
+            logger.error("An error occured while splitting pdf", {
+                error: msg,
+            })
+            trackException(err as Error, {
+                msg: msg,
+            })
             setSplitStatus("error")
             toast.error("Split failed", { description: msg })
             setTimeout(() => setSplitStatus("idle"), 3000)
