@@ -1,6 +1,8 @@
 import React from "react"
 import PdfWorkerUrl from "../../../node_modules/pdfjs-dist/build/pdf.worker.mjs?worker&url"
 import { toast } from "sonner"
+import { logger } from "@/lib/analytics"
+import { captureClientException } from "@/lib/posthog"
 
 interface PdfThumbnailProps {
     file: File
@@ -48,8 +50,9 @@ export function PdfThumbnail({
                 await page.render({ canvasContext: ctx, viewport, canvas })
                     .promise
                 if (!cancelled) setStatus("done")
-            } catch (error) {
-                console.error(error)
+            } catch (error: any) {
+                logger.error("PdfThumbnail error rendering preview", { error: error?.toString() })
+                captureClientException(error, { file: file.name })
                 if (!cancelled) {
                     setStatus("error")
                     toast.error(`Failed to render thumbnail for ${file.name}.`)

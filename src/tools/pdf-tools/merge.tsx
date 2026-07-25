@@ -43,7 +43,11 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import type { PdfFile } from "./store/merge.ts"
 import { formatBytes, acceptPdfFiles } from "./utils.ts"
-import { captureEvent } from "@/lib/posthog.ts"
+import {
+    trackWorkerAnalyticsAndLogs,
+    logger,
+    trackException,
+} from "@/lib/analytics"
 import { DefaultProviders } from "@/components/react/providers.tsx"
 
 const AdBanner = lazy(() =>
@@ -183,48 +187,23 @@ function MergePageContent() {
 
     useEffect(() => {
         let worker: Worker | null = null
+        let cleanupAnalytics: (() => void) | null = null
         try {
-            worker = new Worker(
-                new URL("./pdf-worker.ts", import.meta.url),
-                {
+            worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
                     type: "module",
-                }
-            )
+            })
             workerRef.current = worker
+            // Forward analytics events posted from the worker to all providers
+            cleanupAnalytics = trackWorkerAnalyticsAndLogs(worker)
         } catch (err: any) {
-            console.error(
-                "An unknown error occured when initializing worker: ",
-                err
-            )
+            logger.error("An unknown error occured when initializing worker", {
+                error: err,
+            })
             toast.error("An unknown error occured when initializing worker")
         }
 
-        // Forward analytics events posted from the worker to gtag and PostHog on the main thread
-        const analyticsHandler = (e: MessageEvent) => {
-            if (e.data?.type !== "analytics") return
-            const { event, params } = e.data
-            if (import.meta.env.PROD) {
-                console.log("Sending event to gtag.", { event, params, window })
-                if (
-                    typeof window !== "undefined" &&
-                    typeof (window as Window & { gtag?: Function }).gtag ===
-                        "function"
-                ) {
-                    ;(window as unknown as { gtag: Function }).gtag(
-                        "event",
-                        event,
-                        params
-                    )
-                } else {
-                    console.log(
-                        "Gtag not found; might be blocked due to privacy settings of browser."
-                    )
-                }
-            }
-            captureEvent(event, params)
-        }
-        worker?.addEventListener("message", analyticsHandler)
         return () => {
+            cleanupAnalytics?.()
             worker?.terminate()
             workerRef.current = null
         }
@@ -287,7 +266,6 @@ function MergePageContent() {
     )
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log({ e })
         const picked = acceptPdfFiles(e.target.files)
         if (picked.length) addFiles(picked)
         e.target.value = ""

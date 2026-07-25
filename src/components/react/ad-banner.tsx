@@ -7,6 +7,8 @@ declare global {
     }
 }
 
+import { logger } from "@/lib/analytics"
+
 interface AdBannerProps {
     /** Google AdSense ad slot ID */
     slot: string
@@ -47,8 +49,8 @@ export function AdBanner({
         try {
             const adsbygoogle = window.adsbygoogle || []
             adsbygoogle.push({})
-        } catch (e) {
-            console.error("[AdBanner] adsbygoogle.push failed:", e)
+        } catch (e: any) {
+            logger.error("[AdBanner] adsbygoogle.push failed", { error: e?.toString() })
         }
     }, [])
 

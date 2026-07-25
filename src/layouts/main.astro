@@ -97,8 +97,8 @@ const {
         class="google-anno-skip flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20"
     >
         <script>
-            import { initPostHog } from "@/lib/posthog"
-            initPostHog()
+            import { initAnalytics } from "@/lib/analytics"
+            initAnalytics()
         </script>
         <header
             class="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl"
@@ -251,7 +251,7 @@ const {
                             rel="noopener noreferrer"
                             class="transition-colors hover:text-foreground"
                         >
-                            Naveen M K.
+                            Naveen M K.{" "}
                         </a>
                         Licensed under GNU AGPLv3.
                     </p>

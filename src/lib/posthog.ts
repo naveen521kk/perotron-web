@@ -3,6 +3,7 @@ import posthog, {
     type EventName,
     type Properties,
     type CaptureOptions,
+    type LogAttributeValue,
 } from "posthog-js"
 
 declare global {
@@ -16,7 +17,42 @@ const posthogOptions = {
     ui_host: "https://us.posthog.com",
     defaults: "2026-05-30",
     capture_exceptions: true,
+    logs: { serviceName: "perotron-web", serviceVersion: __APP_VERSION__ },
 } as const
+
+// Avoid throwing errors when we try to do json stringify while logging
+function safeJsonStringify(value: unknown): string {
+    const seen = new WeakSet()
+    try {
+        return JSON.stringify(value, (_key, val) => {
+            if (typeof val === "object" && val !== null) {
+                if (seen.has(val)) {
+                    return "[Circular]"
+                }
+                seen.add(val)
+                if (val instanceof Error) {
+                    return {
+                        name: val.name,
+                        message: val.message,
+                        stack: val.stack,
+                    }
+                }
+                if (
+                    (typeof Event !== "undefined" && val instanceof Event) ||
+                    (val && typeof val === "object" && "nativeEvent" in val)
+                ) {
+                    return `[Event ${(val as any).type || ""}]`.trim()
+                }
+                if (typeof Element !== "undefined" && val instanceof Element) {
+                    return `[Element ${val.tagName}]`
+                }
+            }
+            return val
+        })
+    } catch {
+        return "[Unserializable]"
+    }
+}
 
 class PostHogClient {
     private instance: PostHog | null | undefined
@@ -76,7 +112,7 @@ class PostHogClient {
             // page.on('console'). Format: [PostHog:E2E] <JSON>
             console.log(
                 "[PostHog:E2E]",
-                JSON.stringify({ event, params: params ?? null })
+                safeJsonStringify({ event, params: params ?? null })
             )
         }
     }
@@ -87,7 +123,7 @@ class PostHogClient {
 
     captureClientException(error: Error, context?: Record<string, any>) {
         this.logEvent("captureException", {
-            error,
+            error: { name: error.name, message: error.message, stack: error.stack },
             context,
             version: __APP_VERSION__,
         })
@@ -95,6 +131,19 @@ class PostHogClient {
         const ph = this.getInstance()
         if (ph) {
             ph.captureException(error, { ...context, version: __APP_VERSION__ })
+        }
+    }
+
+    captureLog(
+        level: "info" | "warn" | "error" | "debug",
+        message: string,
+        params?: Record<string, LogAttributeValue>
+    ) {
+        this.logEvent("log", { level, body: message, attributes: params })
+
+        const ph = this.getInstance()
+        if (ph) {
+            ph.captureLog({ level, body: message, attributes: params })
         }
     }
 
@@ -141,4 +190,18 @@ function captureEvent(
     posthogClient.captureEvent(event, params, options)
 }
 
-export { initPostHog, reportPageNotFound, captureClientException, captureEvent }
+function captureLog(
+    level: "info" | "warn" | "error" | "debug",
+    message: string,
+    params?: Record<string, LogAttributeValue>
+) {
+    posthogClient.captureLog(level, message, params)
+}
+
+export {
+    initPostHog,
+    reportPageNotFound,
+    captureClientException,
+    captureEvent,
+    captureLog,
+}

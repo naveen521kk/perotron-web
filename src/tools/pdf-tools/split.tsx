@@ -39,7 +39,11 @@ import { useSplitStore } from "./store/split"
 import type { SplitMode, SizeUnit } from "./store/split"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { captureEvent } from "@/lib/posthog"
+import {
+    trackWorkerAnalyticsAndLogs,
+    logger,
+    trackException,
+} from "@/lib/analytics"
 import { acceptSinglePdf, formatBytes } from "./utils"
 
 /* ── Lazy-loaded components ─────────────────────────────────────── */
@@ -61,12 +65,7 @@ const PdfThumbnail = lazy(() =>
 )
 
 type SplitStatus =
-    | "idle"
-    | "loading-info"
-    | "loading"
-    | "splitting"
-    | "done"
-    | "error"
+    "idle" | "loading-info" | "loading" | "splitting" | "done" | "error"
 
 function SplitPageContent() {
     const splitFile = useSplitStore((s) => s.splitFile)
@@ -104,41 +103,23 @@ function SplitPageContent() {
     // Initialise worker on mount
     useEffect(() => {
         let worker: Worker | null = null
+        let cleanupAnalytics: (() => void) | null = null
         try {
             worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
                 type: "module",
             })
             workerRef.current = worker
+            // Forward analytics events posted from the worker to all providers
+            cleanupAnalytics = trackWorkerAnalyticsAndLogs(worker)
         } catch (err: any) {
-            console.error(
-                "An unknown error occured when initializing worker: ",
-                err
-            )
+            logger.error("An unknown error occured when initializing worker", {
+                error: err,
+            })
             toast.error("An unknown error occured when initializing worker")
         }
 
-        const analyticsHandler = (e: MessageEvent) => {
-            if (e.data?.type !== "analytics") return
-            const { event, params } = e.data
-            if (import.meta.env.PROD) {
-                if (
-                    typeof window !== "undefined" &&
-                    typeof (window as Window & { gtag?: Function }).gtag ===
-                        "function"
-                ) {
-                    ;(window as unknown as { gtag: Function }).gtag(
-                        "event",
-                        event,
-                        params
-                    )
-                }
-            }
-            // posthog?.capture(event, params)
-            captureEvent(event, params)
-        }
-        worker?.addEventListener("message", analyticsHandler)
-
         return () => {
+            cleanupAnalytics?.()
             worker?.terminate()
             workerRef.current = null
         }

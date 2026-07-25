@@ -4,17 +4,17 @@ import {
     getErrorMessage,
     type FallbackProps,
 } from "react-error-boundary"
-import { captureClientException } from "@/lib/posthog"
+import { trackException, logger } from "@/lib/analytics"
 import { Button, buttonVariants } from "@/components/react/ui/button"
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
     const isRoot =
         typeof window !== "undefined" && window.location.pathname === "/"
 
-    console.error("DefaultCatchBoundary Error:", error)
+    logger.error("DefaultCatchBoundary Error", { error: error?.toString() })
 
     useEffect(() => {
-        captureClientException(error as Error, {
+        trackException(error as Error, {
             message: getErrorMessage(error),
         })
     }, [error])
