@@ -62,7 +62,7 @@ describe("Logger module", () => {
                 addEventListener: vi.fn((type: string, handler: (e: MessageEvent) => void) => {
                     if (type === "message") listeners.push(handler)
                 }),
-                removeEventListener: vi.fn((type: string, handler: (e: MessageEvent) => void) => {
+                removeEventListener: vi.fn((_: string, handler: (e: MessageEvent) => void) => {
                     const idx = listeners.indexOf(handler)
                     if (idx !== -1) listeners.splice(idx, 1)
                 }),

@@ -72,7 +72,7 @@ describe("Analytics module", () => {
                     }
                 ),
                 removeEventListener: vi.fn(
-                    (type: string, handler: (e: MessageEvent) => void) => {
+                    (_: string, handler: (e: MessageEvent) => void) => {
                         const idx = listeners.indexOf(handler)
                         if (idx !== -1) listeners.splice(idx, 1)
                     }
