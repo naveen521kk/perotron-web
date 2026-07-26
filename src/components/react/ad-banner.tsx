@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 declare global {
@@ -45,7 +45,15 @@ export function AdBanner({
     client = "ca-pub-7183740147103241",
     className,
 }: AdBannerProps) {
+    const [isMounted, setIsMounted] = useState(false)
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isMounted) return
         try {
             const adsbygoogle = window.adsbygoogle || []
             adsbygoogle.push({})
@@ -54,7 +62,11 @@ export function AdBanner({
                 error: e instanceof Error ? e.message : String(e),
             })
         }
-    }, [])
+    }, [isMounted])
+
+    if (!isMounted) {
+        return null
+    }
 
     return (
         <div className={cn("ad-banner-container", className)}>
