@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 - Improve posthog log collection
 - Add improved testing for QR Generation Tools
+- Unit testing + CI pipelines
+- Fix a bug in QR Generator where clearing a logo wasn't working
 
 ## [1.0.1] - 2026-07-18
 

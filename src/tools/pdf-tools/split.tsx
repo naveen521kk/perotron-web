@@ -39,7 +39,11 @@ import { useSplitStore } from "./store/split"
 import type { SplitMode, SizeUnit } from "./store/split"
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { captureEvent } from "@/lib/posthog"
+import {
+    trackWorkerAnalyticsAndLogs,
+    logger,
+    trackException,
+} from "@/lib/analytics"
 import { acceptSinglePdf, formatBytes } from "./utils"
 
 /* ── Lazy-loaded components ─────────────────────────────────────── */
@@ -61,12 +65,7 @@ const PdfThumbnail = lazy(() =>
 )
 
 type SplitStatus =
-    | "idle"
-    | "loading-info"
-    | "loading"
-    | "splitting"
-    | "done"
-    | "error"
+    "idle" | "loading-info" | "loading" | "splitting" | "done" | "error"
 
 function SplitPageContent() {
     const splitFile = useSplitStore((s) => s.splitFile)
@@ -104,41 +103,24 @@ function SplitPageContent() {
     // Initialise worker on mount
     useEffect(() => {
         let worker: Worker | null = null
+        let cleanupAnalytics: (() => void) | null = null
         try {
             worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
                 type: "module",
             })
             workerRef.current = worker
-        } catch (err: any) {
-            console.error(
-                "An unknown error occured when initializing worker: ",
-                err
-            )
+            // Forward analytics events posted from the worker to all providers
+            cleanupAnalytics = trackWorkerAnalyticsAndLogs(worker)
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err)
+            logger.error("An unknown error occured when initializing worker", {
+                error: msg,
+            })
             toast.error("An unknown error occured when initializing worker")
         }
 
-        const analyticsHandler = (e: MessageEvent) => {
-            if (e.data?.type !== "analytics") return
-            const { event, params } = e.data
-            if (import.meta.env.PROD) {
-                if (
-                    typeof window !== "undefined" &&
-                    typeof (window as Window & { gtag?: Function }).gtag ===
-                        "function"
-                ) {
-                    ;(window as unknown as { gtag: Function }).gtag(
-                        "event",
-                        event,
-                        params
-                    )
-                }
-            }
-            // posthog?.capture(event, params)
-            captureEvent(event, params)
-        }
-        worker?.addEventListener("message", analyticsHandler)
-
         return () => {
+            cleanupAnalytics?.()
             worker?.terminate()
             workerRef.current = null
         }
@@ -185,6 +167,12 @@ function SplitPageContent() {
                 )
             } catch (err: unknown) {
                 const msg = err instanceof Error ? err.message : String(err)
+                logger.error("An error occured while reading pdf", {
+                    error: msg,
+                })
+                trackException(err as Error, {
+                    msg,
+                })
                 setSplitStatus("error")
                 toast.error("Failed to read PDF", { description: msg })
                 setTimeout(() => setSplitStatus("idle"), 3000)
@@ -329,6 +317,12 @@ function SplitPageContent() {
             setTimeout(() => setSplitStatus("idle"), 3000)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err)
+            logger.error("An error occured while splitting pdf", {
+                error: msg,
+            })
+            trackException(err as Error, {
+                msg: msg,
+            })
             setSplitStatus("error")
             toast.error("Split failed", { description: msg })
             setTimeout(() => setSplitStatus("idle"), 3000)
@@ -432,6 +426,7 @@ function SplitPageContent() {
                             htmlFor="split-file-upload"
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={handleDrop}
+                            data-testid="split-file-dropzone"
                             className="group relative flex h-80 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card transition-all duration-300 hover:border-primary/50 hover:bg-accent/30"
                         >
                             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

@@ -1,9 +1,14 @@
 import { test, expect } from "@playwright/test"
 import { navigateToPdfMerge, fixturePath } from "./helpers/navigation"
+import {
+  collectPostHogConsoleEvents,
+  expectPostHogEvent,
+} from "./helpers/posthog"
 import path from "path"
 
 const PDF_1PAGE = path.resolve(fixturePath("test-1page.pdf"))
 const PDF_3PAGE = path.resolve(fixturePath("test-3page.pdf"))
+const PDF_CORRUPTED = path.resolve(fixturePath("test-corrupted.pdf"))
 const NOT_A_PDF = path.resolve(fixturePath("not-a-pdf.txt"))
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -264,6 +269,41 @@ test.describe("PDF Merge Tool", () => {
         page.getByRole("heading", { name: /Merge PDFs/i, level: 1 })
       ).toBeVisible()
       await expect(page.getByTestId("arrange-heading")).not.toBeVisible()
+    })
+
+    test("records PostHog error log and exception on merge failure", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      const events = collectPostHogConsoleEvents(page)
+
+      await navigateToPdfMerge(page)
+      await uploadAndWaitForArrange(page, PDF_CORRUPTED)
+
+      await page.getByTestId("merge-btn").click()
+
+      await expect(
+        page.locator("[data-sonner-toast]").filter({ hasText: "Merge failed" })
+      ).toBeVisible({ timeout: 60_000 })
+
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "log", {
+        level: "error",
+        body: "An error occured while merging files",
+      })
+      expectPostHogEvent(events, "captureException")
+
+      const exceptionEvt = events.find(
+        (e) =>
+          e.event === "captureException" &&
+          (e.properties.context as { total_files?: number })?.total_files !== undefined
+      )
+      expect(exceptionEvt).toBeDefined()
+      expect(exceptionEvt?.properties.context).toMatchObject({
+        total_files: 1,
+      })
     })
   })
 })

@@ -7,7 +7,7 @@ from pypdf import PdfReader, PdfWriter
 
 try:
     __version__ = version("pyodide-tools")
-except PackageNotFoundError:
+except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
 _TOOL_NAME = f"Perotron Web {__version__}"

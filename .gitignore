@@ -32,3 +32,4 @@ playwright-report/
 blob-report/
 e2e/fixtures/*.pdf
 e2e/fixtures/*.txt
+coverage/

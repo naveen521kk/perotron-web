@@ -50,6 +50,13 @@ type WorkerMessage =
 
 type AnalyticsParams = Record<string, string | number | boolean>
 
+type LogMessage = {
+    type: "log"
+    level: "info" | "warn" | "error" | "debug"
+    message: string
+    params?: Record<string, unknown>
+}
+
 type WorkerResponse =
     | { type: "ready" }
     | { type: "done"; id: number; buffer: ArrayBufferLike }
@@ -57,11 +64,42 @@ type WorkerResponse =
     | { type: "error"; id: number; message: string }
     | { type: "status"; id: number; message: string }
     | { type: "analytics"; event: string; params: AnalyticsParams }
+    | LogMessage
 
 // Helpers
-const log = (...args: unknown[]) => console.log("[pdf-worker]", ...args)
-const warn = (...args: unknown[]) => console.warn("[pdf-worker]", ...args)
-const error = (...args: unknown[]) => console.error("[pdf-worker]", ...args)
+function postLog(
+    level: "info" | "warn" | "error" | "debug",
+    message: string,
+    params?: Record<string, unknown>
+) {
+    const response: WorkerResponse = { type: "log", level, message, params }
+    self.postMessage(response)
+}
+
+const log = (msg: string, ...args: unknown[]) => {
+    console.log("[pdf-worker]", msg, ...args)
+    postLog(
+        "info",
+        `[pdf-worker] ${msg}`,
+        args.length > 0 ? { args: args.map(String) } : undefined
+    )
+}
+const warn = (msg: string, ...args: unknown[]) => {
+    console.warn("[pdf-worker]", msg, ...args)
+    postLog(
+        "warn",
+        `[pdf-worker] ${msg}`,
+        args.length > 0 ? { args: args.map(String) } : undefined
+    )
+}
+const error = (msg: string, ...args: unknown[]) => {
+    console.error("[pdf-worker]", msg, ...args)
+    postLog(
+        "error",
+        `[pdf-worker] ${msg}`,
+        args.length > 0 ? { args: args.map(String) } : undefined
+    )
+}
 
 function postAnalytics(event: string, params: AnalyticsParams = {}) {
     const response: WorkerResponse = { type: "analytics", event, params }
@@ -200,6 +238,10 @@ get_pdf_info(bytes(pdf_buffer))
 
     const numPages = info.num_pages ?? 0
     log(`[get-info:${id}] PDF has ${numPages} pages`)
+
+    postAnalytics("get_pdf_info_complete", {
+        num_pages: numPages,
+    })
 
     const response: WorkerResponse = { type: "done-info", id, numPages }
     self.postMessage(response)

@@ -59,6 +59,7 @@ import type {
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import QRCodeStyling from "qr-code-styling"
+import { trackEvent } from "@/lib/analytics"
 import {
     DOT_TYPES,
     CORNER_SQUARE_TYPES,
@@ -213,6 +214,14 @@ function ContentSection() {
         return () => window.removeEventListener("resize", checkMobile)
     }, [])
 
+    const handleContentTypeChange = useCallback(
+        (type: typeof contentType) => {
+            setContentType(type)
+            trackEvent("qr_content_type_changed", { content_type: type })
+        },
+        [setContentType]
+    )
+
     const visibleButtons = isMobile ? ["url", "text"] : ["url", "text", "wifi"]
 
     const dropdownTabs = CONTENT_TABS.filter(
@@ -242,7 +251,7 @@ function ContentSection() {
                             variant={isActive ? "default" : "outline"}
                             size="sm"
                             className="flex h-9 items-center gap-1.5"
-                            onClick={() => setContentType(tab.value)}
+                            onClick={() => handleContentTypeChange(tab.value)}
                             data-testid={`content-tab-${tab.value}`}
                             data-active={isActive ? "true" : "false"}
                         >
@@ -275,7 +284,9 @@ function ContentSection() {
                         {dropdownTabs.map((tab) => (
                             <DropdownMenuItem
                                 key={tab.value}
-                                onClick={() => setContentType(tab.value)}
+                                onClick={() =>
+                                    handleContentTypeChange(tab.value)
+                                }
                                 className="flex cursor-pointer items-center gap-2"
                                 data-testid={`content-tab-${tab.value}`}
                             >
@@ -981,6 +992,11 @@ function PreviewPanel() {
     // Build the QR data string
     const qrData = store.getQrData()
 
+    // Debounced analytics: fire qr_code_generated 800 ms after the last change
+    // so rapid typing doesn't flood the event stream.
+    const analyticsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const prevQrDataRef = useRef<string | null>(null)
+
     // Create/update QR code instance
     useEffect(() => {
         const options = {
@@ -1013,7 +1029,9 @@ function PreviewPanel() {
                 margin: store.logo.logoMargin,
                 crossOrigin: "anonymous" as const,
             },
-            ...(store.logo.logoSrc ? { image: store.logo.logoSrc } : {}),
+            ...(store.logo.logoSrc
+                ? { image: store.logo.logoSrc }
+                : { image: "" }),
         }
 
         if (!qrInstanceRef.current) {
@@ -1028,16 +1046,49 @@ function PreviewPanel() {
             qrInstanceRef.current.update(options)
             setIsReady(true)
         }
-    }, [qrData, store.style, store.logo, store.advanced])
 
-    const handleDownload = useCallback((ext: "png" | "jpeg" | "svg") => {
-        if (!qrInstanceRef.current) return
-        qrInstanceRef.current.download({
-            name: "qr-code",
-            extension: ext,
-        })
-        toast.success(`QR code downloaded as ${ext.toUpperCase()}`)
-    }, [])
+        // Fire debounced analytics only when qrData actually changed and is non-empty
+        if (qrData && qrData !== prevQrDataRef.current) {
+            prevQrDataRef.current = qrData
+            if (analyticsTimerRef.current)
+                clearTimeout(analyticsTimerRef.current)
+            analyticsTimerRef.current = setTimeout(() => {
+                trackEvent("qr_code_generated", {
+                    content_type: store.contentType,
+                    size: store.advanced.size,
+                    error_correction: store.advanced.errorCorrection,
+                    has_logo: store.logo.logoSrc !== null,
+                    dot_type: store.style.dotType,
+                })
+            }, 800)
+        }
+    }, [qrData, store.style, store.logo, store.advanced, store.contentType])
+
+    const handleDownload = useCallback(
+        (ext: "png" | "jpeg" | "svg") => {
+            if (!qrInstanceRef.current) return
+            qrInstanceRef.current.download({
+                name: "qr-code",
+                extension: ext,
+            })
+            toast.success(`QR code downloaded as ${ext.toUpperCase()}`)
+            trackEvent("qr_code_downloaded", {
+                format: ext,
+                content_type: store.contentType,
+                size: store.advanced.size,
+                error_correction: store.advanced.errorCorrection,
+                has_logo: store.logo.logoSrc !== null,
+                dot_type: store.style.dotType,
+            })
+        },
+        [
+            store.contentType,
+            store.advanced.size,
+            store.advanced.errorCorrection,
+            store.logo.logoSrc,
+            store.style.dotType,
+        ]
+    )
 
     return (
         <div

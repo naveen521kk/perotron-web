@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 declare global {
@@ -6,6 +6,8 @@ declare global {
         adsbygoogle: { push: (obj: object) => void } & object[]
     }
 }
+
+import { logger } from "@/lib/analytics"
 
 interface AdBannerProps {
     /** Google AdSense ad slot ID */
@@ -43,14 +45,28 @@ export function AdBanner({
     client = "ca-pub-7183740147103241",
     className,
 }: AdBannerProps) {
+    const [isMounted, setIsMounted] = useState(false)
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isMounted) return
         try {
             const adsbygoogle = window.adsbygoogle || []
             adsbygoogle.push({})
         } catch (e) {
-            console.error("[AdBanner] adsbygoogle.push failed:", e)
+            logger.error("[AdBanner] adsbygoogle.push failed", {
+                error: e instanceof Error ? e.message : String(e),
+            })
         }
-    }, [])
+    }, [isMounted])
+
+    if (!isMounted) {
+        return null
+    }
 
     return (
         <div className={cn("ad-banner-container", className)}>

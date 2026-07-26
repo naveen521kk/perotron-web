@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test"
 import { navigateToPdfSplit, fixturePath } from "./helpers/navigation"
+import {
+  collectPostHogConsoleEvents,
+  expectPostHogEvent,
+} from "./helpers/posthog"
 import path from "path"
 
 const PDF_1PAGE = path.resolve(fixturePath("test-1page.pdf"))
@@ -385,6 +389,169 @@ test.describe("PDF Split Tool", () => {
     })
   })
 
+  // ─── get-info worker ───────────────────────────────────────────────────────
+
+  test.describe("get-info worker (handleGetInfo)", () => {
+    test("shows a loading toast while PDF info is being fetched", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_3PAGE)
+
+      // A Sonner info toast with "Reading PDF info..." should appear before WASM finishes
+      await expect(
+        page.locator("[data-sonner-toast]").filter({ hasText: /reading pdf info/i })
+      ).toBeVisible({ timeout: 15_000 })
+    })
+
+    test("shows WASM status messages while get-info is running", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_3PAGE)
+
+      // At least one of the worker status messages should surface in the UI
+      // before the info panel becomes visible
+      const statusVisible = await Promise.race([
+        page
+          .getByText(/Initialising Pyodide|Reading PDF/i)
+          .first()
+          .waitFor({ timeout: 30_000 })
+          .then(() => true),
+        page
+          .getByTestId("split-file-page-count")
+          .waitFor({ timeout: 60_000 })
+          .then(() => true),
+      ])
+
+      expect(statusVisible).toBe(true)
+    })
+
+    test("shows success toast with page count after get-info completes (3-page PDF)", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_3PAGE)
+
+      // Sonner success toast: "PDF loaded — 3 pages"
+      await expect(
+        page
+          .locator("[data-sonner-toast]")
+          .filter({ hasText: /PDF loaded/i })
+      ).toBeVisible({ timeout: 60_000 })
+
+      await expect(
+        page
+          .locator("[data-sonner-toast]")
+          .filter({ hasText: /3 pages/i })
+      ).toBeVisible({ timeout: 60_000 })
+    })
+
+    test("shows success toast with singular 'page' label for 1-page PDF", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_1PAGE)
+
+      // Sonner success toast: "PDF loaded — 1 page" (no trailing 's')
+      await expect(
+        page
+          .locator("[data-sonner-toast]")
+          .filter({ hasText: /PDF loaded/i })
+          .filter({ hasText: /1 page(?!s)/i })
+      ).toBeVisible({ timeout: 60_000 })
+    })
+
+    test("get-info failure on corrupted PDF shows error toast", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_CORRUPTED)
+
+      // Worker should post an error response → UI shows an error toast
+      await expect(
+        page.locator("[data-sonner-toast][data-type='error']")
+      ).toBeVisible({ timeout: 60_000 })
+    })
+
+    test("page count displayed in sidebar matches PDF page count returned by get-info", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+      await uploadAndWaitForInfo(page, PDF_3PAGE, /3 pages/i)
+
+      // The sidebar page count element should reflect exactly what get-info returned
+      await expect(page.getByTestId("split-file-page-count")).toHaveText(
+        /3 pages/i,
+        { timeout: 60_000 }
+      )
+    })
+
+    test("fires get_pdf_info_complete PostHog event with correct num_pages", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      // Register console listener BEFORE navigating so no events are missed
+      const events = collectPostHogConsoleEvents(page)
+
+      await navigateToPdfSplit(page)
+      await uploadAndWaitForInfo(page, PDF_3PAGE, /3 pages/i)
+
+      // Allow a short tick for the analytics message to be processed
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "get_pdf_info_complete", { num_pages: 3 })
+    })
+
+    test("fires get_pdf_info_complete with num_pages=1 for a 1-page PDF", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      const events = collectPostHogConsoleEvents(page)
+
+      await navigateToPdfSplit(page)
+      await uploadAndWaitForInfo(page, PDF_1PAGE, /1 page$/i)
+
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "get_pdf_info_complete", { num_pages: 1 })
+    })
+  })
+
   // ─── Invalid / Error scenarios ─────────────────────────────────────────────
 
   test.describe("Invalid / Error scenarios", () => {
@@ -471,6 +638,72 @@ test.describe("PDF Split Tool", () => {
           .locator("[data-sonner-toast]")
           .filter({ hasText: /range|valid/i })
       ).toBeVisible({ timeout: 10_000 })
+    })
+
+    test("records PostHog error log and exception on PDF read failure", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      const events = collectPostHogConsoleEvents(page)
+
+      await navigateToPdfSplit(page)
+
+      const fileInput = page
+        .locator('input[type="file"][accept="application/pdf"]')
+        .first()
+      await fileInput.setInputFiles(PDF_CORRUPTED)
+
+      await expect(
+        page.locator("[data-sonner-toast]").filter({ hasText: "Failed to read PDF" })
+      ).toBeVisible({ timeout: 60_000 })
+
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "log", {
+        level: "error",
+        body: "An error occured while reading pdf",
+      })
+      expectPostHogEvent(events, "captureException")
+
+      const exceptionEvt = events.find((e) => e.event === "captureException")
+      expect(exceptionEvt).toBeDefined()
+      expect(exceptionEvt?.properties.context).toHaveProperty("msg")
+    })
+
+    test("records PostHog error log and exception on PDF split failure", async ({
+      page,
+    }) => {
+      test.setTimeout(120_000)
+
+      await navigateToPdfSplit(page)
+      await uploadAndWaitForInfo(page, PDF_3PAGE)
+
+      const events = collectPostHogConsoleEvents(page)
+
+      await page.getByTestId("split-tab-pages").click()
+      await page.getByTestId("page-spec-input").fill("999")
+
+      await page.getByTestId("split-btn").click()
+
+      await expect(
+        page.locator("[data-sonner-toast]").filter({ hasText: "Split failed" })
+      ).toBeVisible({ timeout: 60_000 })
+
+      await page.waitForTimeout(500)
+
+      expectPostHogEvent(events, "log", {
+        level: "error",
+        body: "An error occured while splitting pdf",
+      })
+      expectPostHogEvent(events, "captureException")
+
+      const exceptionEvt = events.find(
+        (e) =>
+          e.event === "captureException" &&
+          (e.properties.context as { msg?: string })?.msg !== undefined
+      )
+      expect(exceptionEvt).toBeDefined()
     })
   })
 })

@@ -3,6 +3,7 @@ import "@/styles/global.css"
 
 import DarkMode from "@/components/dark-mode.astro"
 import Logo from "@/components/logo.astro"
+import NavLinks from "@/components/nav-links.astro"
 
 import { Separator } from "@/components/react/ui/separator"
 import { ModeToggle } from "@/components/react/mode-toggle"
@@ -70,22 +71,24 @@ const {
         <link rel="canonical" href={finalUrl} />
         <link rel="sitemap" href="/sitemap-index.xml" />
         {
-            import.meta.env.PROD && (
+            import.meta.env.PROD && !import.meta.env.PUBLIC_E2E_TEST && (
                 <>
                     <script
                         async
                         src="https://www.googletagmanager.com/gtag/js?id=G-F61KVD3XWG"
+                        is:inline
                     />
                     <script
                         async
                         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7183740147103241"
                         crossorigin="anonymous"
+                        is:inline
                     />
                 </>
             )
         }
         {
-            import.meta.env.PROD && (
+            import.meta.env.PROD && !import.meta.env.PUBLIC_E2E_TEST && (
                 <script
                     is:inline
                     set:html={`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-F61KVD3XWG');`}
@@ -97,8 +100,8 @@ const {
         class="google-anno-skip flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20"
     >
         <script>
-            import { initPostHog } from "@/lib/posthog"
-            initPostHog()
+            import { initAnalytics } from "@/lib/analytics"
+            initAnalytics()
         </script>
         <header
             class="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl"
@@ -119,20 +122,7 @@ const {
                     className="my-auto hidden h-7 md:block"
                 />
 
-                <nav class="hidden items-center gap-5 md:flex">
-                    <a
-                        href="/pdf"
-                        class="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
-                    >
-                        PDF Tools
-                    </a>
-                    <a
-                        href="/qr"
-                        class="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
-                    >
-                        QR Tools
-                    </a>
-                </nav>
+                <NavLinks />
 
                 <div class="ml-auto flex items-center gap-2">
                     <ModeToggle client:load />
@@ -251,7 +241,7 @@ const {
                             rel="noopener noreferrer"
                             class="transition-colors hover:text-foreground"
                         >
-                            Naveen M K.
+                            Naveen M K.{" "}
                         </a>
                         Licensed under GNU AGPLv3.
                     </p>

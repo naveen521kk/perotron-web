@@ -43,7 +43,11 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import type { PdfFile } from "./store/merge.ts"
 import { formatBytes, acceptPdfFiles } from "./utils.ts"
-import { captureEvent } from "@/lib/posthog.ts"
+import {
+    trackWorkerAnalyticsAndLogs,
+    logger,
+    trackException,
+} from "@/lib/analytics"
 import { DefaultProviders } from "@/components/react/providers.tsx"
 
 const AdBanner = lazy(() =>
@@ -183,48 +187,24 @@ function MergePageContent() {
 
     useEffect(() => {
         let worker: Worker | null = null
+        let cleanupAnalytics: (() => void) | null = null
         try {
-            worker = new Worker(
-                new URL("./pdf-worker.ts", import.meta.url),
-                {
-                    type: "module",
-                }
-            )
+            worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
+                type: "module",
+            })
             workerRef.current = worker
-        } catch (err: any) {
-            console.error(
-                "An unknown error occured when initializing worker: ",
-                err
-            )
+            // Forward analytics events posted from the worker to all providers
+            cleanupAnalytics = trackWorkerAnalyticsAndLogs(worker)
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err)
+            logger.error("An unknown error occured when initializing worker", {
+                error: msg,
+            })
             toast.error("An unknown error occured when initializing worker")
         }
 
-        // Forward analytics events posted from the worker to gtag and PostHog on the main thread
-        const analyticsHandler = (e: MessageEvent) => {
-            if (e.data?.type !== "analytics") return
-            const { event, params } = e.data
-            if (import.meta.env.PROD) {
-                console.log("Sending event to gtag.", { event, params, window })
-                if (
-                    typeof window !== "undefined" &&
-                    typeof (window as Window & { gtag?: Function }).gtag ===
-                        "function"
-                ) {
-                    ;(window as unknown as { gtag: Function }).gtag(
-                        "event",
-                        event,
-                        params
-                    )
-                } else {
-                    console.log(
-                        "Gtag not found; might be blocked due to privacy settings of browser."
-                    )
-                }
-            }
-            captureEvent(event, params)
-        }
-        worker?.addEventListener("message", analyticsHandler)
         return () => {
+            cleanupAnalytics?.()
             worker?.terminate()
             workerRef.current = null
         }
@@ -287,7 +267,6 @@ function MergePageContent() {
     )
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log({ e })
         const picked = acceptPdfFiles(e.target.files)
         if (picked.length) addFiles(picked)
         e.target.value = ""
@@ -356,6 +335,13 @@ function MergePageContent() {
             setTimeout(() => setMergeStatus("idle"), 3000)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err)
+            logger.error("An error occured while merging files", {
+                error: msg,
+            })
+            trackException(err as Error, {
+                total_files: files.length,
+                msg: msg,
+            })
             setMergeStatus("error")
             toast.error("Merge failed", { description: msg })
             setTimeout(() => setMergeStatus("idle"), 3000)
@@ -409,6 +395,7 @@ function MergePageContent() {
                             htmlFor="merge-file-upload"
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={handleInitialDrop}
+                            data-testid="merge-file-dropzone"
                             className="group relative flex h-80 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card transition-all duration-300 hover:border-primary/50 hover:bg-accent/30"
                         >
                             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

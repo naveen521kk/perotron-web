@@ -1,0 +1,70 @@
+name: Pyodide Tools Tests & Coverage
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "pyodide-tools/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "pyodide-tools/**"
+
+defaults:
+  run:
+    working-directory: pyodide-tools
+    shell: bash
+
+jobs:
+  test:
+    name: pytest + coverage (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "pyodide-tools/uv.lock"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies (including dev group)
+        run: uv sync --frozen --group dev
+
+      - name: Run tests with coverage
+        run: uv run pytest
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-html-py${{ matrix.python-version }}
+          path: pyodide-tools/htmlcov/
+          retention-days: 14
+
+      - name: Upload XML coverage report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-xml-py${{ matrix.python-version }}
+          path: pyodide-tools/coverage.xml
+          retention-days: 14

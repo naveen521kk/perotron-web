@@ -16,10 +16,10 @@ const pathname = Astro.url.pathname
         </a>
     </main>
     <script>
-        import { reportPageNotFound } from "@/lib/posthog.ts"
+        import { trackPageNotFound } from "@/lib/analytics.ts"
         const pathname =
             document.querySelector("main")?.getAttribute("data-pathname") ||
             window.location.pathname
-        reportPageNotFound(pathname)
+        trackPageNotFound(pathname)
     </script>
 </Layout>
