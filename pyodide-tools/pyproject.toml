@@ -1,6 +1,6 @@
 [project]
 name = "pyodide-tools"
-version = "1.0.1"
+version = "2.0.0"
 description = "Pyodide-based PDF processing tools for Perotron Web"
 readme = "README.md"
 authors = [
