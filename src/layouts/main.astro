@@ -3,6 +3,7 @@ import "@/styles/global.css"
 
 import DarkMode from "@/components/dark-mode.astro"
 import Logo from "@/components/logo.astro"
+import NavLinks from "@/components/nav-links.astro"
 
 import { Separator } from "@/components/react/ui/separator"
 import { ModeToggle } from "@/components/react/mode-toggle"
@@ -119,20 +120,7 @@ const {
                     className="my-auto hidden h-7 md:block"
                 />
 
-                <nav class="hidden items-center gap-5 md:flex">
-                    <a
-                        href="/pdf"
-                        class="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
-                    >
-                        PDF Tools
-                    </a>
-                    <a
-                        href="/qr"
-                        class="text-sm text-muted-foreground transition-colors hover:text-foreground [&.active]:font-medium [&.active]:text-foreground"
-                    >
-                        QR Tools
-                    </a>
-                </nav>
+                <NavLinks />
 
                 <div class="ml-auto flex items-center gap-2">
                     <ModeToggle client:load />

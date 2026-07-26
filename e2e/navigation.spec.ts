@@ -21,20 +21,71 @@ test.describe("Navigation & Layout", () => {
     await expect(page).toHaveURL("/")
   })
 
-  test("desktop nav links navigate to correct pages", async ({ page }) => {
+  test("desktop nav links navigate to correct pages", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Desktop nav links are hidden on mobile viewports")
+
     await navigateToHome(page)
 
     // PDF Tools link
-    const pdfLink = page.locator("header nav").getByRole("link", { name: "PDF Tools" })
+    const pdfLink = page
+      .getByTestId("nav-links")
+      .getByRole("link", { name: "PDF Tools" })
     await expect(pdfLink).toBeVisible()
     await pdfLink.click()
     await expect(page).toHaveURL("/pdf")
 
     // QR Tools link
-    const qrLink = page.locator("header nav").getByRole("link", { name: "QR Tools" })
+    const qrLink = page
+      .getByTestId("nav-links")
+      .getByRole("link", { name: "QR Tools" })
     await expect(qrLink).toBeVisible()
     await qrLink.click()
     await expect(page).toHaveURL("/qr")
+  })
+
+  test("desktop nav links display correct active status for routes", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Desktop nav links are hidden on mobile viewports")
+
+    const nav = page.getByTestId("nav-links")
+    const pdfLink = nav.getByRole("link", { name: "PDF Tools" })
+    const qrLink = nav.getByRole("link", { name: "QR Tools" })
+    const activeClassRegex = /(^|\s)active(\s|$)/
+
+    // On home page, no nav link should be active
+    await page.goto("/")
+    await waitForAppReady(page)
+    await expect(pdfLink).not.toHaveClass(activeClassRegex)
+    await expect(qrLink).not.toHaveClass(activeClassRegex)
+
+    // On /pdf category page, PDF Tools link should be active
+    await page.goto("/pdf")
+    await waitForAppReady(page)
+    await expect(pdfLink).toHaveClass(activeClassRegex)
+    await expect(qrLink).not.toHaveClass(activeClassRegex)
+
+    // On /pdf/merge sub-route, PDF Tools link should remain active
+    await page.goto("/pdf/merge")
+    await waitForAppReady(page)
+    await expect(pdfLink).toHaveClass(activeClassRegex)
+    await expect(qrLink).not.toHaveClass(activeClassRegex)
+
+    // On /qr category page, QR Tools link should be active
+    await page.goto("/qr")
+    await waitForAppReady(page)
+    await expect(pdfLink).not.toHaveClass(activeClassRegex)
+    await expect(qrLink).toHaveClass(activeClassRegex)
+
+    // On /qr/generator sub-route, QR Tools link should remain active
+    await page.goto("/qr/generator")
+    await waitForAppReady(page)
+    await expect(pdfLink).not.toHaveClass(activeClassRegex)
+    await expect(qrLink).toHaveClass(activeClassRegex)
   })
 
   test("footer contains Privacy Policy and Terms links", async ({ page }) => {
