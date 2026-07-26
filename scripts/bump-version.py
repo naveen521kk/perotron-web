@@ -3,8 +3,9 @@
 bump-version.py — Bump the Perotron Web version in all the right places.
 
 Usage:
-    python scripts/bump-version.py --minor    # 1.0.0 → 1.0.1
-    python scripts/bump-version.py --major    # 1.0.0 → 1.1.0
+    python scripts/bump-version.py --minor      # 1.0.0 → 1.0.1
+    python scripts/bump-version.py --major      # 1.0.0 → 1.1.0
+    python scripts/bump-version.py --breaking   # 1.0.0 → 2.0.0
     python scripts/bump-version.py --dry-run --minor   # preview without writing
 
 The version is bumped in:
@@ -39,9 +40,12 @@ def parse_version(v: str) -> tuple[int, int, int]:
     return int(parts[0]), int(parts[1]), int(parts[2])
 
 
-def bump(version: str, *, minor: bool) -> str:
+def bump(version: str, *, minor: bool, breaking: bool) -> str:
     major, minor_v, patch = parse_version(version)
-    if minor:
+    if breaking:
+        # --breaking: major increment  (1.0.0 → 2.0.0)
+        return f"{major + 1}.0.0"
+    elif minor:
         # --minor: patch increment  (1.0.0 → 1.0.1)
         return f"{major}.{minor_v}.{patch + 1}"
     else:
@@ -143,6 +147,11 @@ def main() -> None:
         action="store_true",
         help="Minor increment: 1.0.0 → 1.1.0",
     )
+    group.add_argument(
+        "--breaking",
+        action="store_true",
+        help="Major increment: 1.0.0 → 2.0.0",
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -162,7 +171,7 @@ def main() -> None:
     if not m:
         sys.exit(f"ERROR: Could not find version in {PYPROJECT}")
     old_version = m.group(1)
-    new_version = bump(old_version, minor=args.minor)
+    new_version = bump(old_version, minor=args.minor, breaking=args.breaking)
 
     print(f"Bumping  {old_version}  →  {new_version}\n")
 
