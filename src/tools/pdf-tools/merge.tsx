@@ -195,9 +195,10 @@ function MergePageContent() {
             workerRef.current = worker
             // Forward analytics events posted from the worker to all providers
             cleanupAnalytics = trackWorkerAnalyticsAndLogs(worker)
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err)
             logger.error("An unknown error occured when initializing worker", {
-                error: err,
+                error: msg,
             })
             toast.error("An unknown error occured when initializing worker")
         }

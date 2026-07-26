@@ -41,7 +41,7 @@ function safeJsonStringify(value: unknown): string {
                     (typeof Event !== "undefined" && val instanceof Event) ||
                     (val && typeof val === "object" && "nativeEvent" in val)
                 ) {
-                    return `[Event ${(val as any).type || ""}]`.trim()
+                    return `[Event ${(val as unknown as { type?: string }).type || ""}]`.trim()
                 }
                 if (typeof Element !== "undefined" && val instanceof Element) {
                     return `[Element ${val.tagName}]`
@@ -121,7 +121,7 @@ class PostHogClient {
         this.captureEvent("page_not_found", { path: pathname })
     }
 
-    captureClientException(error: Error, context?: Record<string, any>) {
+    captureClientException(error: Error, context?: Record<string, unknown>) {
         this.logEvent("captureException", {
             error: { name: error.name, message: error.message, stack: error.stack },
             context,
@@ -178,7 +178,7 @@ function reportPageNotFound(pathname: string) {
     posthogClient.reportPageNotFound(pathname)
 }
 
-function captureClientException(error: Error, context?: Record<string, any>) {
+function captureClientException(error: Error, context?: Record<string, unknown>) {
     posthogClient.captureClientException(error, context)
 }
 

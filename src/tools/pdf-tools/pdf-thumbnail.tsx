@@ -50,9 +50,13 @@ export function PdfThumbnail({
                 await page.render({ canvasContext: ctx, viewport, canvas })
                     .promise
                 if (!cancelled) setStatus("done")
-            } catch (error: any) {
-                logger.error("PdfThumbnail error rendering preview", { error: error?.toString() })
-                captureClientException(error, { file: file.name })
+            } catch (error: unknown) {
+                const err =
+                    error instanceof Error ? error : new Error(String(error))
+                logger.error("PdfThumbnail error rendering preview", {
+                    error: err.message,
+                })
+                captureClientException(err, { file: file.name })
                 if (!cancelled) {
                     setStatus("error")
                     toast.error(`Failed to render thumbnail for ${file.name}.`)
@@ -64,7 +68,6 @@ export function PdfThumbnail({
         return () => {
             cancelled = true
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [file, width])
 
     if (status === "error") {

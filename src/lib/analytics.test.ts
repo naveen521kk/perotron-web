@@ -41,7 +41,7 @@ describe("Analytics module", () => {
             const gtagSpy = vi.fn()
             ;(window as unknown as { gtag: typeof gtagSpy }).gtag = gtagSpy
 
-            vi.stubEnv("PROD", true as any)
+            vi.stubEnv("PROD", true as unknown as boolean)
 
             try {
                 trackEvent("prod_event", { count: 5 })

@@ -49,8 +49,10 @@ export function AdBanner({
         try {
             const adsbygoogle = window.adsbygoogle || []
             adsbygoogle.push({})
-        } catch (e: any) {
-            logger.error("[AdBanner] adsbygoogle.push failed", { error: e?.toString() })
+        } catch (e) {
+            logger.error("[AdBanner] adsbygoogle.push failed", {
+                error: e instanceof Error ? e.message : String(e),
+            })
         }
     }, [])
 

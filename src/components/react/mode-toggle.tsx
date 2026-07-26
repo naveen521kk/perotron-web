@@ -12,12 +12,14 @@ import {
 export function ModeToggle() {
     const [theme, setThemeState] = React.useState<
         "theme-light" | "dark" | "system"
-    >("theme-light")
-
-    React.useEffect(() => {
-        const isDarkMode = document.documentElement.classList.contains("dark")
-        setThemeState(isDarkMode ? "dark" : "theme-light")
-    }, [])
+    >(() => {
+        if (typeof window !== "undefined") {
+            return document.documentElement.classList.contains("dark")
+                ? "dark"
+                : "theme-light"
+        }
+        return "theme-light"
+    })
 
     React.useEffect(() => {
         const isDark =
