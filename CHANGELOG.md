@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixes
+- Fixed the theme consistency across globally
+
 ## [2.0.0] - 2026-07-26
 
 ### Migration
